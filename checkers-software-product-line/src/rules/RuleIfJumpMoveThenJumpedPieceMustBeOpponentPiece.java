@@ -4,7 +4,7 @@ import java.util.List;
 import core.*;
 
 public class RuleIfJumpMoveThenJumpedPieceMustBeOpponentPiece implements IRule {
-
+	
 	public boolean evaluate(AbstractReferee referee) {
 		IMoveCoordinate moveCoordinate = referee.getCurrentMoveCoordinate();
 		IPlayer player = referee.getCurrentPlayer();

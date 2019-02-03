@@ -3,6 +3,7 @@ package base;
 import java.awt.Color;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import core.*;
 
@@ -55,6 +56,10 @@ public class Player implements IPlayer {
 		if (id != other.id)
 			return false;
 		return true;
+	}
+	
+	public List<AbstractPiece> getPieceList(){
+		return Collections.unmodifiableList(pieceList);
 	}
 
 }
