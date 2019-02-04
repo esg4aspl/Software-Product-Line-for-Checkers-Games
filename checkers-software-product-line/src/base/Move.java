@@ -8,4 +8,14 @@ public class Move extends AbstractMove {
 		super(player, moveCoordinate);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		AbstractMove m = (AbstractMove)obj;
+		return this.getPlayer().equals(m.getPlayer()) 
+				&& this.getMoveCoordinate().equals(m.getMoveCoordinate());
+	}
+	
+	
+
 }

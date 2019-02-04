@@ -104,8 +104,9 @@ public class CoordinateBasedOperations {
 	protected List<ICoordinate> findAllowedCorrectedDestinationList(ICoordinate sourceCoordinate, 
 			List<ICoordinate> possibleRelativeDestinationList) {
 		List<ICoordinate> possibleCorrectedDestinationList = correctDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		//printList(possibleCorrectedDestinationList, "Possible Corrected Destination List");
+		//printPathList(possibleCorrectedDestinationList, "Possible Corrected Destination List");
 		List<ICoordinate> allowedCorrectedDestinationList = trimDestinationList(possibleCorrectedDestinationList);
+		//printPathList(allowedCorrectedDestinationList, "Allowed Trimmed Destination List");
 		return allowedCorrectedDestinationList;
 	}
 
@@ -126,6 +127,8 @@ public class CoordinateBasedOperations {
 		if ((x >= 0 && x <= board.maxOfDimensionX) && (y >= 0 && y <= board.maxOfDimensionY))
 			// second check if cell is 1
 			if (board.boardMatrix[x][y] == 1) return true;
+			
+			
 		return false;
 	}
 
@@ -146,6 +149,7 @@ public class CoordinateBasedOperations {
 		IPieceMovePossibilities pieceMovePossibilities = piece.getPieceMovePossibilities();
 		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
 		List<ICoordinate> allowedCorrectedDestinationList = findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
+		System.out.println("SOURCE: "+sourceCoordinate);
 		printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List");
 		List<ICoordinate> secondJumpList = new ArrayList<>();
 		for(ICoordinate destinationCoordinate : allowedCorrectedDestinationList) {
@@ -154,11 +158,12 @@ public class CoordinateBasedOperations {
 	    			&& !isPieceBlockedForJump(piece, destinationCoordinate)) {
 	    		List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
 				ICoordinate pathCoordinate = path.get(1);
-System.out.println("Path Coordinate " + pathCoordinate);
+//System.out.println("Path Coordinate " + pathCoordinate);
 				AbstractPiece pieceAtPath = board.getCoordinatePieceMap().getPieceAtCoordinate(pathCoordinate);
 				if (pieceAtPath != null) secondJumpList.add(destinationCoordinate);
 	    	}
 		}
+		//printCoordinateList(secondJumpList,"SECOND JUMP LIST");
 		return secondJumpList;
 	}
 

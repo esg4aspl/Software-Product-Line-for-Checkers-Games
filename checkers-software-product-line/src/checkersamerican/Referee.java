@@ -74,7 +74,7 @@ public class Referee extends AbstractReferee {
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean startWithAutomaticGame = true;
+		boolean startWithAutomaticGame = false;
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
@@ -163,7 +163,8 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected boolean checkMove() {
-		return isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
+		return isSatisfied(new RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat(), this)
+				&& isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
 				&& isSatisfied(new RuleThereMustNotBePieceAtDestinationCoordinate(), this)
 				&& isSatisfied(new RulePieceAtSourceCoordinateMustBelongToCurrentPlayer(), this)
 				&& isSatisfied(new RuleDestinationCoordinateMustBeValidForCurrentPiece(), this)
