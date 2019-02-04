@@ -158,11 +158,12 @@ public class CoordinateBasedOperations {
 	    			&& !isPieceBlockedForJump(piece, destinationCoordinate)) {
 	    		List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
 				ICoordinate pathCoordinate = path.get(1);
-System.out.println("Path Coordinate " + pathCoordinate);
+//System.out.println("Path Coordinate " + pathCoordinate);
 				AbstractPiece pieceAtPath = board.getCoordinatePieceMap().getPieceAtCoordinate(pathCoordinate);
 				if (pieceAtPath != null) secondJumpList.add(destinationCoordinate);
 	    	}
 		}
+		//printCoordinateList(secondJumpList,"SECOND JUMP LIST");
 		return secondJumpList;
 	}
 
