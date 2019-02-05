@@ -36,7 +36,7 @@ public class RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat implements IRule {
 				IMoveCoordinate moveCoord = new MoveCoordinate(sourceCoordinateForCheck,possibleMove);
 				List<ICoordinate> path = referee.getBoard().getCBO().findPath(piece, moveCoord);
 				ICoordinate pathCoordinate = path.get(1);
-				System.out.println("Path Coordinate " + pathCoordinate);
+				//System.out.println("Path Coordinate " + pathCoordinate);
 				AbstractPiece pieceAtPath = referee.getCoordinatePieceMap().getPieceAtCoordinate(pathCoordinate);
 				if(!pieceAtPath.getPlayer().equals(currentPlayer))
 					possibleCapturedMoves.add(moveCoord);

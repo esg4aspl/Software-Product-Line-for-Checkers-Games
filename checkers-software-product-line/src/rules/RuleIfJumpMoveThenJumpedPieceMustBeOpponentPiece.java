@@ -18,7 +18,7 @@ public class RuleIfJumpMoveThenJumpedPieceMustBeOpponentPiece implements IRule {
 			ICoordinate pathCoordinate = path.get(1);
 			System.out.println("Path Coordinate " + pathCoordinate);
 			AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
-			if (pieceAtPath.getPlayer().equals(player)) {
+			if (pieceAtPath==null || pieceAtPath.getPlayer().equals(player)) {
 				System.out.println("Jumped Piece Must Be Opponent Piece");
 				return false;
 			}

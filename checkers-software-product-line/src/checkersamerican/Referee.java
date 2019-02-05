@@ -74,10 +74,11 @@ public class Referee extends AbstractReferee {
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean startWithAutomaticGame = false;
+		boolean startWithAutomaticGame = true;
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
-			endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
+			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
+			//endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -91,7 +92,8 @@ public class Referee extends AbstractReferee {
 				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
-			endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
+			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
+			//endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame) break;
 			
@@ -99,7 +101,8 @@ public class Referee extends AbstractReferee {
 			if (currentPlayerID >= numberOfPlayers) currentPlayerID = 0;
 			currentPlayer = getPlayerbyID(currentPlayerID);
 		} 
-		announceWinner();
+		//consoleView.drawBoardView();
+		System.out.println("WINNER "+announceWinner());
 		consoleView.closeFile();
 		System.exit(0);
 	}
@@ -130,7 +133,11 @@ public class Referee extends AbstractReferee {
 		List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
+		//if piece become king then terminate the move
+		AbstractPiece  temp  = piece;
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
+		if(!temp.equals(piece))
+			moveOpResult = new MoveOpResult(true, false);
 		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 			conductCurrentPlayerTurnAgain(moveOpResult, piece);
@@ -138,6 +145,7 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
+		AbstractPiece temp  = piece;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
 			List<ICoordinate> secondJumpList = board.getCBO().findAllowedContinousJumpList(piece);
 			board.getCBO().printPathList(secondJumpList, "Second Jump List");
@@ -156,6 +164,8 @@ public class Referee extends AbstractReferee {
 					coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 					moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 					piece = becomeAndOrPutOperation(piece, destinationCoordinate);
+					if(!temp.equals(piece)) 
+						moveOpResult = new MoveOpResult(true, false);
 				}
 			}
 		}
