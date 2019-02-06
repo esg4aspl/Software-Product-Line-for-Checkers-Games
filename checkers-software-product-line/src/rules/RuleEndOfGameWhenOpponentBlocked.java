@@ -1,6 +1,5 @@
 package rules;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import base.Player;
@@ -46,7 +45,6 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 		if (currentPlayerID >= referee.getNumberOfPlayers()) currentPlayerID = 0;
 		Player otherPlayer = (Player)playerList.getPlayer(currentPlayerID);
 		List<AbstractPiece> otherPlayerPieces = otherPlayer.getPieceList();
-		List<IMoveCoordinate> possibleMoves = new ArrayList<IMoveCoordinate>();
 		for(AbstractPiece piece : otherPlayerPieces) {
 			//check is there any jump move
 			//System.out.println(piece+" BLOCKEDDDD!!!");
@@ -59,19 +57,17 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 					//System.out.println(piece+" - "+possibleMoveCoordinate+" ***********");
 					if(isDestinationCoodinateValidAndNull(possibleMoveCoordinate, referee, piece, board) && 
 							isJumpedPieceExistsAndBelongsToOpponent(referee, possibleMoveCoordinate, currentPlayer, piece, board,cboInner)) {
-						possibleMoves.add(possibleMoveCoordinate);
+						return false;
 					}
 				}else {
 					if(isDestinationCoodinateValidAndNull(possibleMoveCoordinate, referee, piece, board))
-						possibleMoves.add(possibleMoveCoordinate);
+						return false;
 				}
 			}
 		}
-		if(possibleMoves.isEmpty()) {
-			System.out.println("OPPONENT'S MOVE IS BLOCKED!!!!!!");
-			return true;
-		}	
-		return false;
+		System.out.println("OPPONENT'S MOVE IS BLOCKED!!!!!!");
+		return true;
+		
 	}
 	
 	private boolean isJumpedPieceExistsAndBelongsToOpponent(AbstractReferee referee, IMoveCoordinate possibleMoveCoordinate,
