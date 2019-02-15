@@ -41,4 +41,11 @@ public class PlayerList implements IPlayerList {
 		return stringToReturn;
 	}
 	
+	@Override
+	public String toString() {
+		String players = "";
+		for(IPlayer p : playerList)
+			players += p+"\n";
+		return players;
+	}
 }

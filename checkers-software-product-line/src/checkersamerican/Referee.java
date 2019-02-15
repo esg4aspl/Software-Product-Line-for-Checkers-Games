@@ -77,10 +77,12 @@ public class Referee extends AbstractReferee {
 		boolean endOfGameDraw = false;
 		boolean startWithAutomaticGame = false;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
+		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
+
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			//endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -94,23 +96,24 @@ public class Referee extends AbstractReferee {
 				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
-			endOfGameDraw = isSatisfied(noPromoteRule, this);
-			if (endOfGameDraw) {
-				System.out.println("Draw "+announceDraw());
-				consoleView.closeFile();
-				System.exit(0);
-			}
+
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			//endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			
 			System.out.println("End Of Game? " + endOfGame);
-			if (endOfGame) break;
+			if (endOfGame || endOfGameDraw) break;
 			
 			currentPlayerID++;
 			if (currentPlayerID >= numberOfPlayers) currentPlayerID = 0;
 			currentPlayer = getPlayerbyID(currentPlayerID);
 		} 
 		//consoleView.drawBoardView();
-		System.out.println("WINNER "+announceWinner());
+		
+		if(endOfGameDraw)
+			System.out.println("DRAW\n" + announceDraw());
+		else
+			System.out.println("WINNER " + announceWinner());
+		
 		consoleView.closeFile();
 		System.exit(0);
 	}
@@ -208,11 +211,13 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected AbstractPiece becomeAndOrPutOperation(AbstractPiece piece, ICoordinate destinationCoordinate) {
-		if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
-				|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
-			IPlayer player = piece.getPlayer();
-			piece = becomeNewPiece(player, piece);
-		}
+		//check the piece is already king or not
+		if(!(piece instanceof King))
+			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
+					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
+				IPlayer player = piece.getPlayer();
+				piece = becomeNewPiece(player, piece);
+			}
 		coordinatePieceMap.putPieceToCoordinate(piece, destinationCoordinate);
 		return piece;
 	}
@@ -235,8 +240,8 @@ public class Referee extends AbstractReferee {
 		return playerList.getPlayer(currentPlayerID);
 	}
 	
-	public List<IPlayer> announceDraw(){
-		return playerList.getPlayers();
+	public IPlayerList announceDraw(){
+		return playerList;
 	}
 	
 	public IPlayer getCurrentPlayer() {

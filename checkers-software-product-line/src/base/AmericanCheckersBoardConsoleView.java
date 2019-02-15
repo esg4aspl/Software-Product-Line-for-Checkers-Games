@@ -111,20 +111,32 @@ public class AmericanCheckersBoardConsoleView {
 	}
 	
 	public IMoveCoordinate getNextMove(IPlayer currentPlayer) {
-		
-		ICoordinate sourceCoordinate = inputHelper("Enter Source Coordinate x,y for Player " + currentPlayer.getId());
-		ICoordinate destinationCoordinate = inputHelper("Enter Destination Coordinate x,y for Player " + currentPlayer.getId());
-		int scx = sourceCoordinate.getXCoordinate();
-		int scy = sourceCoordinate.getYCoordinate();
-		int dcx = sourceCoordinate.getXCoordinate();
-		int dcy = sourceCoordinate.getYCoordinate();
-		IMoveCoordinate moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);
-		AbstractMove move = new Move(currentPlayer, moveCoordinate);
-		if (scx==9 && scy==9 && dcx==9 && dcy==9) {
-			moveFileWriter.closeFile();
-			System.exit(0);
+		boolean flag = false;
+		IMoveCoordinate moveCoordinate = null;
+		while(!flag) {
+			flag = true;
+			ICoordinate sourceCoordinate = inputHelper("Enter Source Coordinate x,y for Player " + currentPlayer.getId());
+			ICoordinate destinationCoordinate = inputHelper("Enter Destination Coordinate x,y for Player " + currentPlayer.getId());
+			int scx = sourceCoordinate.getXCoordinate();
+			int scy = sourceCoordinate.getYCoordinate();
+			int dcx = sourceCoordinate.getXCoordinate();
+			int dcy = sourceCoordinate.getYCoordinate();
+	
+			moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);		
+			AbstractMove move = new Move(currentPlayer, moveCoordinate);
+			
+			if (scx==9 && scy==9 && dcx==9 && dcy==9) {
+				moveFileWriter.closeFile();
+				System.exit(0);
+			}
+			else 
+				{
+					if(checkersBoard.isCoordinateOnBoard(sourceCoordinate) && checkersBoard.isCoordinateOnBoard(destinationCoordinate)) 
+						moveFileWriter.writeMoveToFile(move);
+					else
+						flag = false;    // coordinate must be on the board
+				}
 		}
-		else moveFileWriter.writeMoveToFile(move);
 		return moveCoordinate;
 	}
 

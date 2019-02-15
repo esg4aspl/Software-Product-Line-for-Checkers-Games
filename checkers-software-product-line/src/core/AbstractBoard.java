@@ -49,6 +49,15 @@ public abstract class AbstractBoard {
 		return cbo.containsDestinationCoordinateInCorrectedDestinationList(destinationCoordinate, allowedCorrectedDestinationList);
 	}
 
+	public boolean isCoordinateOnBoard(ICoordinate coordinate) {
+		int coordinateX = coordinate.getXCoordinate();
+		int coordinateY = coordinate.getYCoordinate();
+		if((maxOfDimensionX >= coordinateX) && (maxOfDimensionY >= coordinateY) && (coordinateX >= 0 && coordinateY >= 0))
+			return true;
+		else
+			return false;
+	}
+	
 	public CoordinatePieceMap getCoordinatePieceMap() {
 		return coordinatePieceMap;
 	}
