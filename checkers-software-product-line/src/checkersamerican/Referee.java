@@ -74,7 +74,9 @@ public class Referee extends AbstractReferee {
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean startWithAutomaticGame = true;
+		boolean endOfGameDraw = false;
+		boolean startWithAutomaticGame = false;
+		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
@@ -92,6 +94,12 @@ public class Referee extends AbstractReferee {
 				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
+			endOfGameDraw = isSatisfied(noPromoteRule, this);
+			if (endOfGameDraw) {
+				System.out.println("Draw "+announceDraw());
+				consoleView.closeFile();
+				System.exit(0);
+			}
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
 			//endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
 			System.out.println("End Of Game? " + endOfGame);
@@ -200,8 +208,8 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected AbstractPiece becomeAndOrPutOperation(AbstractPiece piece, ICoordinate destinationCoordinate) {
-		if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7)
-				|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0)) {
+		if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
+				|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
 			IPlayer player = piece.getPlayer();
 			piece = becomeNewPiece(player, piece);
 		}
@@ -225,6 +233,10 @@ public class Referee extends AbstractReferee {
 	
 	public IPlayer announceWinner() {
 		return playerList.getPlayer(currentPlayerID);
+	}
+	
+	public List<IPlayer> announceDraw(){
+		return playerList.getPlayers();
 	}
 	
 	public IPlayer getCurrentPlayer() {
