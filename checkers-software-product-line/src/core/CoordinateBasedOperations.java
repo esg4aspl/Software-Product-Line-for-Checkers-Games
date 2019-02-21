@@ -101,7 +101,7 @@ public class CoordinateBasedOperations {
 		return possibleCorrectedDestinationList;
 	}
 
-	protected List<ICoordinate> findAllowedCorrectedDestinationList(ICoordinate sourceCoordinate, 
+	public List<ICoordinate> findAllowedCorrectedDestinationList(ICoordinate sourceCoordinate, 
 			List<ICoordinate> possibleRelativeDestinationList) {
 		List<ICoordinate> possibleCorrectedDestinationList = correctDestinationList(sourceCoordinate, possibleRelativeDestinationList);
 		//printPathList(possibleCorrectedDestinationList, "Possible Corrected Destination List");

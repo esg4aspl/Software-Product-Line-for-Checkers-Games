@@ -10,34 +10,22 @@ import core.CoordinateBasedOperations;
 import core.CoordinatePieceMap;
 import core.ICoordinate;
 import core.IMoveCoordinate;
+import core.IPieceMovePossibilities;
 import core.IPlayer;
 import core.IPlayerList;
 import core.IRule;
 import core.MoveCoordinate;
 
 public class RuleEndOfGameWhenOpponentBlocked implements IRule {
-	private class CBOInner extends CoordinateBasedOperations {
-
-		public CBOInner(AbstractBoard board) {
-			super(board);
-			// TODO Auto-generated constructor stub
-		}
-		
-		public List<ICoordinate> possibleMoveCoordinate(AbstractPiece piece){
-			List<ICoordinate> relativePossibleDestinationList = piece.getPieceMovePossibilities().getPossibleRelativeDestinationList(piece.getCurrentCoordinate(), piece.getGoalDirection());
-			return findAllowedCorrectedDestinationList(piece.getCurrentCoordinate(), relativePossibleDestinationList);
-		}
-	}
 	
 	@Override
 	public boolean evaluate(AbstractReferee referee) {
 		// TODO Auto-generated method stub
-		AbstractBoard board = referee.getBoard();
-		CBOInner cboInner = new CBOInner(board);
-		return isOpponentMoveBlocked(referee,cboInner,board);
+		return isOpponentMoveBlocked(referee);
 	}
 	
-	private boolean isOpponentMoveBlocked(AbstractReferee referee,CBOInner cboInner,AbstractBoard board) {
+	private boolean isOpponentMoveBlocked(AbstractReferee referee) {
+		AbstractBoard board = referee.getBoard();
 		IPlayerList playerList = referee.getPlayers();
 		IPlayer currentPlayer = referee.getCurrentPlayer();
 		int currentPlayerID = currentPlayer.getId();
@@ -49,14 +37,17 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 			//check is there any jump move
 			//System.out.println(piece+" BLOCKEDDDD!!!");
 			ICoordinate sourceCoordinateOfCurrentPiece = piece.getCurrentCoordinate();
-			List<ICoordinate> allowedList = cboInner.possibleMoveCoordinate(piece);
+			CoordinateBasedOperations cbo = board.getCBO();
+			IPieceMovePossibilities piecePossibilities = piece.getPieceMovePossibilities();
+			List<ICoordinate> relativePossibleDestinationList = piecePossibilities.getPossibleRelativeDestinationList(piece.getCurrentCoordinate(), piece.getGoalDirection());
+			List<ICoordinate> allowedList = cbo.findAllowedCorrectedDestinationList(piece.getCurrentCoordinate(), relativePossibleDestinationList);
 			for(ICoordinate possibleDestinationCoordinate :  allowedList) {
 				IMoveCoordinate possibleMoveCoordinate = new MoveCoordinate(sourceCoordinateOfCurrentPiece,possibleDestinationCoordinate);
 				//if possible move is jump move then consider correct jump control also
 				if(board.getMBO().isJumpMove(piece, possibleMoveCoordinate)) {
 					//System.out.println(piece+" - "+possibleMoveCoordinate+" ***********");
 					if(isDestinationCoodinateValidAndNull(possibleMoveCoordinate, referee, piece, board) && 
-							isJumpedPieceExistsAndBelongsToOpponent(referee, possibleMoveCoordinate, currentPlayer, piece, board,cboInner)) {
+							isJumpedPieceExistsAndBelongsToOpponent(referee, possibleMoveCoordinate, currentPlayer, piece, cbo)) {
 						return false;
 					}
 				}else {
@@ -71,9 +62,9 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 	}
 	
 	private boolean isJumpedPieceExistsAndBelongsToOpponent(AbstractReferee referee, IMoveCoordinate possibleMoveCoordinate,
-		IPlayer currentPlayer,AbstractPiece currentPiece,AbstractBoard board,CBOInner cboInner) {
+		IPlayer currentPlayer,AbstractPiece currentPiece,CoordinateBasedOperations cbo) {
 		CoordinatePieceMap coordinatePieceMap = referee.getCoordinatePieceMap();
-		List<ICoordinate> path = cboInner.findPath(currentPiece, possibleMoveCoordinate);
+		List<ICoordinate> path = cbo.findPath(currentPiece, possibleMoveCoordinate);
 		ICoordinate pathCoordinate = path.get(1);
 		AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
 		if (pieceAtPath==null || pieceAtPath.getPlayer().equals(currentPlayer)) {
