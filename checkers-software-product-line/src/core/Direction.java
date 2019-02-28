@@ -27,5 +27,29 @@ public enum Direction {
 	public int getYDelta() {
 		return yDelta;
 	}
+	
+	public Direction getOppositeDirection() {
+		switch(this) {
+		case N:
+			return S;
+		case E:
+			return W;
+		case NE:
+			return SW;
+		case NW:
+			return SE;
+		case S:
+			return N;
+		case SE:
+			return NW;
+		case SW:
+			return NE;
+		case W:
+			return E;
+		default:
+			return this;
+		}
+		
+	}
 
 }

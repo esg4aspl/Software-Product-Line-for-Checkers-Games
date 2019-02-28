@@ -53,7 +53,7 @@ public class CoordinateBasedOperations {
 		return findDirection(sourceCoordinate, destinationCoordinate);
 	}
 
-	protected Direction findDirection(ICoordinate sourceCoordinate, ICoordinate destinationCoordinate) {
+	public Direction findDirection(ICoordinate sourceCoordinate, ICoordinate destinationCoordinate) {
 		int sourceX = sourceCoordinate.getXCoordinate();
 		int sourceY = sourceCoordinate.getYCoordinate();
 		int destinationX = destinationCoordinate.getXCoordinate();
@@ -149,8 +149,8 @@ public class CoordinateBasedOperations {
 		IPieceMovePossibilities pieceMovePossibilities = piece.getPieceMovePossibilities();
 		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
 		List<ICoordinate> allowedCorrectedDestinationList = findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		System.out.println("SOURCE: "+sourceCoordinate);
-		printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List");
+		//System.out.println("SOURCE: "+sourceCoordinate);
+		//printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List");
 		List<ICoordinate> secondJumpList = new ArrayList<>();
 		for(ICoordinate destinationCoordinate : allowedCorrectedDestinationList) {
 			IMoveCoordinate moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);
@@ -159,7 +159,6 @@ public class CoordinateBasedOperations {
 	    		List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
 				//ICoordinate pathCoordinate = path.get(1);
 				//System.out.println("Path Coordinate " + pathCoordinate);
-				 
 				int howManyPiecesAreOnPath = 0;
 				for(int i=1; i<path.size()-1;i++) {
 					ICoordinate coordinateOnPath = path.get(i);
@@ -169,7 +168,8 @@ public class CoordinateBasedOperations {
 					}
 				}
 				if(howManyPiecesAreOnPath==1) {
-					secondJumpList.add(path.get(path.size()-1));
+					ICoordinate destination = path.get(path.size()-1);
+					secondJumpList.add(destination);
 				}
 	    	}
 		}

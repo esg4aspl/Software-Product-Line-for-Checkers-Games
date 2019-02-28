@@ -25,6 +25,7 @@ import core.MoveOpResult;
 import rules.RuleDestinationCoordinateMustBeValidForCurrentPiece;
 import rules.RuleDrawIfNoPromoteForFortyTurn;
 import rules.RuleEndOfGameGeneral;
+import rules.RuleEndOfGameIfEachPlayerHasOnePiece;
 import rules.RuleEndOfGameNoPieceCapturedForFortyTurn;
 import rules.RuleEndOfGameWhenOpponentBlocked;
 import rules.RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat;
@@ -104,14 +105,15 @@ public class TurkishReferee extends AbstractReferee{
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean endOfGameDraw = false;
-		boolean startWithAutomaticGame = true;
+		boolean startWithAutomaticGame = false;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
 		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
 
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this) || 
+					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -127,7 +129,8 @@ public class TurkishReferee extends AbstractReferee{
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this) || 
+					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
@@ -231,6 +234,7 @@ public class TurkishReferee extends AbstractReferee{
 		return king;
 	}
 	
+	/*
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
 		AbstractPiece temp  = piece;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
@@ -244,6 +248,48 @@ public class TurkishReferee extends AbstractReferee{
 				}
 					
 			}
+			if (secondJumpList.size() == 0) {
+				moveOpResult = new MoveOpResult(false, false);
+				break;
+			}
+			board.getCBO().printPathList(secondJumpList, "Second Jump List");
+			currentMoveCoordinate = consoleView.getNextMove(currentPlayer);
+			ICoordinate sourceCoordinate = currentMoveCoordinate.getSourceCoordinate();
+			ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
+			if (!checkMove()) continue;
+			moveOpResult = new MoveOpResult(false, false);
+			for(ICoordinate coordinate : secondJumpList) {
+				if (coordinate.equals(destinationCoordinate)) {
+					List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
+					coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
+					moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
+					piece = becomeAndOrPutOperation(piece, destinationCoordinate);
+					if(!temp.equals(piece)) 
+						moveOpResult = new MoveOpResult(true, false);
+				}
+			}
+		}
+		return true;
+	}
+	*/
+	
+	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
+		AbstractPiece temp  = piece;
+		while (moveOpResult.isCurrentPlayerTurnAgain()) {
+			List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
+			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();
+			Direction lastMoveDirection = board.getCBO().findDirection(currentMoveCoordinate.getSourceCoordinate(),currentMoveCoordinate.getDestinationCoordinate());
+			for(ICoordinate destinationCoordinate : jumpList) {
+				IMoveCoordinate moveCoordinate = new MoveCoordinate(piece.getCurrentCoordinate(), destinationCoordinate);
+				List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
+				Direction newDirection = board.getCBO().findDirection(currentMoveCoordinate.getDestinationCoordinate(), destinationCoordinate);
+				if(!isCurrentPlayersPieceOnPath(currentPlayer, path) && !lastMoveDirection.getOppositeDirection().equals(newDirection) ){
+					secondJumpList.add(destinationCoordinate);
+				}
+				
+					
+			}
+			
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;

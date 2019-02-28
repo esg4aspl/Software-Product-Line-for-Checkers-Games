@@ -3,7 +3,7 @@ package rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import base.Player;
+import core.AbstractBoard;
 import core.AbstractPiece;
 import core.AbstractReferee;
 import core.CoordinateBasedOperations;
@@ -26,7 +26,8 @@ public class RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat implements IRule {
 		IMoveCoordinate moveCoordinate = referee.getCurrentMoveCoordinate();
 		CoordinateBasedOperations cbo = referee.getBoard().getCBO();
 		//later this will change getPieceList method can be moved in interface
-		List<AbstractPiece> pieceList =((Player)currentPlayer).getPieceList();
+		AbstractBoard board = referee.getBoard();
+		List<AbstractPiece> pieceList =currentPlayer.getPieceList();
 		List<IMoveCoordinate> possibleCapturedMoves = new ArrayList<IMoveCoordinate>();
 		for(AbstractPiece piece : pieceList) {
 			//get current coordinate of piece and try all possible moves to check
@@ -35,11 +36,16 @@ public class RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat implements IRule {
 			for(ICoordinate possibleMove:cbo.findAllowedContinousJumpList(piece)) {
 				IMoveCoordinate moveCoord = new MoveCoordinate(sourceCoordinateForCheck,possibleMove);
 				List<ICoordinate> path = referee.getBoard().getCBO().findPath(piece, moveCoord);
-				ICoordinate pathCoordinate = path.get(1);
-				//System.out.println("Path Coordinate " + pathCoordinate);
-				AbstractPiece pieceAtPath = referee.getCoordinatePieceMap().getPieceAtCoordinate(pathCoordinate);
-				if(!pieceAtPath.getPlayer().equals(currentPlayer))
-					possibleCapturedMoves.add(moveCoord);
+				
+				for(int i=1; i<path.size()-1; i++) {
+					ICoordinate coordinateOnPath = path.get(i);
+					AbstractPiece pieceAtCoord = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinateOnPath);
+					if(pieceAtCoord!=null) {
+						if(!pieceAtCoord.getPlayer().equals(currentPlayer))
+							possibleCapturedMoves.add(moveCoord);
+					}
+						
+				}
 			}
 		}
 		if(possibleCapturedMoves.size()>0) {
