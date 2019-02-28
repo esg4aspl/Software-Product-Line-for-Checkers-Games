@@ -1,6 +1,7 @@
 package core;
 
 import java.awt.Color;
+import java.util.List;
 
 public interface IPlayer {
 
@@ -9,5 +10,5 @@ public interface IPlayer {
 	public void addPiece(AbstractPiece piece);
 	public void removePiece(AbstractPiece piece);
 	public int getNumberOfPieces();
-	
+	public List<AbstractPiece> getPieceList();
 }

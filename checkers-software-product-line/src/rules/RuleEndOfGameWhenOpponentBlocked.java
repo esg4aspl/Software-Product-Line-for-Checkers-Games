@@ -2,7 +2,6 @@ package rules;
 
 import java.util.List;
 
-import base.Player;
 import core.AbstractBoard;
 import core.AbstractPiece;
 import core.AbstractReferee;
@@ -31,7 +30,7 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 		int currentPlayerID = currentPlayer.getId();
 		currentPlayerID++;
 		if (currentPlayerID >= referee.getNumberOfPlayers()) currentPlayerID = 0;
-		Player otherPlayer = (Player)playerList.getPlayer(currentPlayerID);
+		IPlayer otherPlayer = playerList.getPlayer(currentPlayerID);
 		List<AbstractPiece> otherPlayerPieces = otherPlayer.getPieceList();
 		for(AbstractPiece piece : otherPlayerPieces) {
 			//check is there any jump move

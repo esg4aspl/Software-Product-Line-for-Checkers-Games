@@ -157,15 +157,52 @@ public class CoordinateBasedOperations {
 	    	if (board.getMBO().isJumpMove(piece, moveCoordinate)
 	    			&& !isPieceBlockedForJump(piece, destinationCoordinate)) {
 	    		List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
-				ICoordinate pathCoordinate = path.get(1);
-//System.out.println("Path Coordinate " + pathCoordinate);
-				AbstractPiece pieceAtPath = board.getCoordinatePieceMap().getPieceAtCoordinate(pathCoordinate);
-				if (pieceAtPath != null) secondJumpList.add(destinationCoordinate);
+				//ICoordinate pathCoordinate = path.get(1);
+				//System.out.println("Path Coordinate " + pathCoordinate);
+				 
+				int howManyPiecesAreOnPath = 0;
+				for(int i=1; i<path.size()-1;i++) {
+					ICoordinate coordinateOnPath = path.get(i);
+					AbstractPiece pieceAtCoord = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinateOnPath);
+					if(pieceAtCoord!=null) {
+						howManyPiecesAreOnPath++;
+					}
+				}
+				if(howManyPiecesAreOnPath==1) {
+					secondJumpList.add(path.get(path.size()-1));
+				}
 	    	}
 		}
 		//printCoordinateList(secondJumpList,"SECOND JUMP LIST");
 		return secondJumpList;
 	}
+	/*
+	public List<ICoordinate> findAllowedContiniousJumpListForMultipleSquare(AbstractPiece piece){
+		ICoordinate sourceCoordinate = piece.getCurrentCoordinate();
+		IPieceMovePossibilities pieceMovePossibilities = piece.getPieceMovePossibilities();
+		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
+		List<ICoordinate> allowedCorrectedDestinationList = findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
+		List<ICoordinate> secondJumpList = new ArrayList<>();
+		for(ICoordinate destinationCoordinate : allowedCorrectedDestinationList) {
+			IMoveCoordinate moveCoordinate = new MoveCoordinate(sourceCoordinate,destinationCoordinate);
+			if(board.getMBO().isJumpMove(piece, moveCoordinate) && 
+					!isPieceBlockedForJump(piece, destinationCoordinate)) {
+				List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
+				int howManyPiecesAreOnPath = 0;
+				for(int i=1; i<path.size()-1;i++) {
+					ICoordinate coordinateOnPath = path.get(i);
+					AbstractPiece pieceAtCoord = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinateOnPath);
+					if(pieceAtCoord!=null) {
+						howManyPiecesAreOnPath++;
+					}
+				}
+				if(howManyPiecesAreOnPath==1) {
+					secondJumpList.add(path.get(path.size()-1));
+				}
+			}
+		}
+		return secondJumpList;
+	}*/
 
 	public boolean isPieceBlockedForJump(AbstractPiece piece, ICoordinate coordinate) {
     	AbstractPiece pieceAtDestination = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinate);

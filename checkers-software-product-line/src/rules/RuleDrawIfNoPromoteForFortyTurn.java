@@ -1,13 +1,12 @@
 package rules;
 
-import java.util.List;
 
-import base.Player;
+import base.Pawn;
 import core.AbstractReferee;
+import core.IPlayer;
 import core.AbstractPiece;
 import core.IRule;
 import core.Zone;
-import core.IPlayer;
 import core.IPlayerList;
 
 public class RuleDrawIfNoPromoteForFortyTurn implements IRule {
@@ -33,9 +32,9 @@ public class RuleDrawIfNoPromoteForFortyTurn implements IRule {
 		int numberOfPlayer=referee.getNumberOfPlayers();
 		IPlayerList playerList = referee.getPlayers();
 		for(int i=0; i<numberOfPlayer; i++) {
-			Player tmpPlayer= (Player)playerList.getPlayer(i);
+			IPlayer tmpPlayer= playerList.getPlayer(i);
 			for(AbstractPiece piece : tmpPlayer.getPieceList()) {
-				if((piece.getIcon().equals("A") || piece.getIcon().equals("Z")) && piece.getCurrentZone().equals(Zone.ONBOARD))
+				if(!(piece instanceof Pawn) && piece.getCurrentZone().equals(Zone.ONBOARD))
 					currentNumberOfKing++;
 			}
 		}

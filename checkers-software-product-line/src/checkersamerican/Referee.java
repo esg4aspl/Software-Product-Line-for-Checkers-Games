@@ -75,7 +75,7 @@ public class Referee extends AbstractReferee {
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean endOfGameDraw = false;
-		boolean startWithAutomaticGame = true;
+		boolean startWithAutomaticGame = false;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
 		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
 
