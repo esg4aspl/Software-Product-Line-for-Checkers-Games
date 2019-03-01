@@ -110,6 +110,40 @@ public class AmericanCheckersBoardConsoleView {
 		return new Coordinate(coordinatex, coordinatey);
 	}
 	
+	public IMoveCoordinate getNextMove(IPlayer currentPlayer, ICoordinate newSourceCoordinate) {
+		boolean flag = false;
+		IMoveCoordinate moveCoordinate = null;
+		while(!flag) {
+			flag = true;
+			ICoordinate sourceCoordinate = newSourceCoordinate;
+			ICoordinate destinationCoordinate = inputHelper("Enter Destination Coordinate x,y for Player " + currentPlayer.getId());
+			int scx = sourceCoordinate.getXCoordinate();
+			int scy = sourceCoordinate.getYCoordinate();
+			int dcx = sourceCoordinate.getXCoordinate();
+			int dcy = sourceCoordinate.getYCoordinate();
+	
+			moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);		
+			AbstractMove move = new Move(currentPlayer, moveCoordinate);
+			
+			if (scx==9 && scy==9 && dcx==9 && dcy==9) {
+				moveFileWriter.closeFile();
+				System.exit(0);
+			}
+			else 
+			{
+				if(checkersBoard.isCoordinateOnBoard(sourceCoordinate) && checkersBoard.isCoordinateOnBoard(destinationCoordinate)) 
+					moveFileWriter.writeMoveToFile(move);
+				else {
+					flag = false;   
+					System.out.println("Coordinate must be on the board!");
+				}
+						
+			}
+		}
+		return moveCoordinate;
+	}
+	
+	
 	public IMoveCoordinate getNextMove(IPlayer currentPlayer) {
 		boolean flag = false;
 		IMoveCoordinate moveCoordinate = null;
@@ -130,12 +164,15 @@ public class AmericanCheckersBoardConsoleView {
 				System.exit(0);
 			}
 			else 
-				{
-					if(checkersBoard.isCoordinateOnBoard(sourceCoordinate) && checkersBoard.isCoordinateOnBoard(destinationCoordinate)) 
-						moveFileWriter.writeMoveToFile(move);
-					else
-						flag = false;    // coordinate must be on the board
+			{
+				if(checkersBoard.isCoordinateOnBoard(sourceCoordinate) && checkersBoard.isCoordinateOnBoard(destinationCoordinate)) 
+					moveFileWriter.writeMoveToFile(move);
+				else {
+					flag = false;   
+					System.out.println("Coordinate must be on the board!");
 				}
+						
+			}
 		}
 		return moveCoordinate;
 	}

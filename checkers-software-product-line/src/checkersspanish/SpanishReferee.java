@@ -1,4 +1,4 @@
-package checkersturkish;
+package checkersspanish;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -6,9 +6,10 @@ import java.util.List;
 
 import base.AmericanCheckersBoardConsoleView;
 import base.Pawn;
+import base.PawnMoveConstraints;
+import base.PawnMovePossibilities;
 import base.Player;
 import base.PlayerList;
-import checkersamerican.King;
 import core.AbstractGameConfiguration;
 import core.AbstractPiece;
 import core.AbstractReferee;
@@ -25,7 +26,6 @@ import core.MoveOpResult;
 import rules.RuleDestinationCoordinateMustBeValidForCurrentPiece;
 import rules.RuleDrawIfNoPromoteForFortyTurn;
 import rules.RuleEndOfGameGeneral;
-import rules.RuleEndOfGameIfEachPlayerHasOnePiece;
 import rules.RuleEndOfGameNoPieceCapturedForFortyTurn;
 import rules.RuleEndOfGameWhenOpponentBlocked;
 import rules.RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat;
@@ -35,17 +35,19 @@ import rules.RulePieceAtSourceCoordinateMustBelongToCurrentPlayer;
 import rules.RuleThereMustBePieceAtSourceCoordinate;
 import rules.RuleThereMustNotBePieceAtDestinationCoordinate;
 
-public class TurkishReferee extends AbstractReferee{
+public class SpanishReferee extends AbstractReferee{
 	protected AmericanCheckersBoardConsoleView consoleView;
 	protected boolean automaticGameOn;
 
-	public TurkishReferee(AbstractGameConfiguration gameConfiguration) {
+	public SpanishReferee(AbstractGameConfiguration gameConfiguration) {
 		super(gameConfiguration);
-		automaticGameOn=true;
+		// TODO Auto-generated constructor stub
+		automaticGameOn=false;
 	}
 
 	@Override
 	public void setup() {
+		// TODO Auto-generated method stub
 		setupPlayers();
 		setupBoardMVC();
 		setupPiecesOnBoard();
@@ -64,7 +66,7 @@ public class TurkishReferee extends AbstractReferee{
 	}
 
 	private void setupBoardMVC() {
-		board = new TurkishCheckerBoard();
+		board = new SpanishCheckersBoard();
 		coordinatePieceMap = board.getCoordinatePieceMap();
 		consoleView = new AmericanCheckersBoardConsoleView(this);
 		
@@ -74,9 +76,9 @@ public class TurkishReferee extends AbstractReferee{
 		// create pieces for players and put them on board
 		IPlayer player;
 		AbstractPiece men;
-		TurkishStartCoordinates startCoordinates = new TurkishStartCoordinates();
-		IPieceMovePossibilities menMovePossibilities = new TurkishPawnPossibilities();
-		IPieceMoveConstraints menMoveConstraints =  new TurkishPawnConstraints();
+		SpanishStartCoordinates startCoordinates = new SpanishStartCoordinates();
+		IPieceMovePossibilities menMovePossibilities = new PawnMovePossibilities();
+		IPieceMoveConstraints menMoveConstraints =  new PawnMoveConstraints();
 
 		for (int i = 0; i < numberOfPlayers; i++) {
 			player = playerList.getPlayer(i);
@@ -103,15 +105,14 @@ public class TurkishReferee extends AbstractReferee{
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean endOfGameDraw = false;
-		boolean startWithAutomaticGame = true;
+		boolean startWithAutomaticGame = false;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
 		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
 
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this) || 
-					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -127,8 +128,7 @@ public class TurkishReferee extends AbstractReferee{
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this) || 
-					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
@@ -193,7 +193,6 @@ public class TurkishReferee extends AbstractReferee{
 		List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
 
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
-		
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
 		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
@@ -207,7 +206,6 @@ public class TurkishReferee extends AbstractReferee{
 		if (board.getMBO().isJumpMove(piece, moveCoordinate) && piecesOnPath(path).size()==1) {
 			System.out.println("Jump Move");
 			ICoordinate pathCoordinate = piecesOnPath(path).get(0);
-			System.out.println("Path Coordinate " + pathCoordinate);
 			AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
 			if (!pieceAtPath.getPlayer().equals(player)) {
 				// capture piece at path
@@ -223,45 +221,33 @@ public class TurkishReferee extends AbstractReferee{
 		int pieceID = piece.getId();
 		Direction goalDirection = piece.getGoalDirection();
 		player.removePiece(piece);
-		IPieceMovePossibilities kingMovePossibilities = new TurkishKingMovePossibilities();
-		IPieceMoveConstraints kingMoveConstraints =  new TurkishKingMoveConstraints();
+		IPieceMovePossibilities kingMovePossibilities = new QueenMovePossibilities();
+		IPieceMoveConstraints kingMoveConstraints =  new QueenMoveConstraints();
 		String icon;
 		if (player.getId() == 0) icon = "A";
 		else icon = "Z";
-		AbstractPiece king = new King(pieceID, icon, player, goalDirection, kingMovePossibilities, kingMoveConstraints);
+		AbstractPiece king = new Queen(pieceID, icon, player, goalDirection, kingMovePossibilities, kingMoveConstraints);
 		player.addPiece(king);
 		return king;
 	}
 	
 	
-	private List<ICoordinate> findAllowedJumpListWithOpponentPieceOnPath(AbstractPiece piece){
-		List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
-		getBoard().getCBO().printPathList(jumpList, "-----------deniz abe");
-		List<ICoordinate> allowedJumpList = new ArrayList<ICoordinate>();
-		for(ICoordinate destinationCoordinate : jumpList) {
-			IMoveCoordinate moveCoordinate = new MoveCoordinate(piece.getCurrentCoordinate(), destinationCoordinate);
-			List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
-			if(!isCurrentPlayersPieceOnPath(currentPlayer, path))
-				allowedJumpList.add(destinationCoordinate);	
-		}
-		return allowedJumpList;
-	}
-	
-	
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
-		//AbstractPiece temp  = piece;
+		AbstractPiece temp  = piece;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
-			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();		
-			List<ICoordinate> jumpList = findAllowedJumpListWithOpponentPieceOnPath(piece);
+			List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
+			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();
 			
 			Direction lastMoveDirection = board.getCBO().findDirection(currentMoveCoordinate.getSourceCoordinate(),currentMoveCoordinate.getDestinationCoordinate());
 			
 			for(ICoordinate destinationCoordinate : jumpList) {
+				IMoveCoordinate moveCoordinate = new MoveCoordinate(piece.getCurrentCoordinate(), destinationCoordinate);
+				List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
 				Direction newDirection = board.getCBO().findDirection(currentMoveCoordinate.getDestinationCoordinate(), destinationCoordinate);
-				if(!lastMoveDirection.getOppositeDirection().equals(newDirection) )
+				if(!isCurrentPlayersPieceOnPath(currentPlayer, path) && !lastMoveDirection.getOppositeDirection().equals(newDirection))
 					secondJumpList.add(destinationCoordinate);	
 			}
-			
+				
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;
@@ -278,7 +264,8 @@ public class TurkishReferee extends AbstractReferee{
 					coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 					moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 					piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-					
+					if(!temp.equals(piece)) 
+						moveOpResult = new MoveOpResult(true, false);
 				}
 			}
 		}
@@ -301,20 +288,14 @@ public class TurkishReferee extends AbstractReferee{
 	}
 	
 	protected AbstractPiece becomeAndOrPutOperation(AbstractPiece piece, ICoordinate destinationCoordinate) {
-		//check the piece is already king or not
-		if(!(piece instanceof King))
+		//check the piece is already queen or not
+		if(!(piece instanceof Queen))
 			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
 					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
 				IPlayer player = piece.getPlayer();
-				piece.setCurrentCoordinate(destinationCoordinate);
-				List<ICoordinate> allowedJumpList = findAllowedJumpListWithOpponentPieceOnPath(piece);
-				if(allowedJumpList.size() == 0) {
-					piece = becomeNewPiece(player, piece);
-				}
+				piece = becomeNewPiece(player, piece);
 			}
-		
 		coordinatePieceMap.putPieceToCoordinate(piece, destinationCoordinate);
-		
 		return piece;
 	}
 	

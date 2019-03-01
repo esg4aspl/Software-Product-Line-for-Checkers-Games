@@ -1,15 +1,16 @@
 package checkersspanish;
 
-import base.*;
+import core.AbstractGameConfiguration;
+import core.AbstractReferee;
 
 public class SpanishCheckersApp {
 
 	public static void main(String[] args) {
 		
-		AmericanGameConfiguration gameConfiguration = new AmericanGameConfiguration();
-		//TurkishReferee referee = new TurkishReferee(gameConfiguration);
-		//referee.setup();
-		//referee.conductGame();
+		AbstractGameConfiguration gameConfiguration = new SpanishGameConfiguration();
+		AbstractReferee referee = new SpanishReferee(gameConfiguration);
+		referee.setup();
+		referee.conductGame();
 	}
 
 }
