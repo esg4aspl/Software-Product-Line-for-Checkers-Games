@@ -69,4 +69,13 @@ public abstract class AbstractBoard {
 	public MoveBasedOperations getMBO() {
 		return mbo;
 	}
+	
+	public boolean isPlayableCoordinate(ICoordinate coordinate) {
+		int coordinateX = coordinate.getXCoordinate();
+		int coordinateY = coordinate.getYCoordinate();
+		if(boardMatrix[coordinateY][coordinateX]==1)
+			return true;
+		else
+			return false;
+	}
 }
