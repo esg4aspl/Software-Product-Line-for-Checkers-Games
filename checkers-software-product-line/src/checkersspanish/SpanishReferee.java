@@ -112,7 +112,7 @@ public class SpanishReferee extends AbstractReferee{
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -128,7 +128,7 @@ public class SpanishReferee extends AbstractReferee{
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) );
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;

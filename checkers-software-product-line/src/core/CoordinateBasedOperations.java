@@ -16,25 +16,40 @@ public class CoordinateBasedOperations {
 		ICoordinate destinationCoordinate = moveCoordinate.getDestinationCoordinate();
 		IPieceMovePossibilities pieceMovePossibilities = piece.getPieceMovePossibilities();
 		Direction direction = findDirection(sourceCoordinate, destinationCoordinate);
+		//System.out.println(direction + " direction " + sourceCoordinate +" - " +destinationCoordinate);
 		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
 		List<ICoordinate> allowedCorrectedDestinationList = findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		//printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List");
+		//printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List AAA");
 		List<ICoordinate> path = new ArrayList<>();
 		path.add(sourceCoordinate);
 		while (!(sourceCoordinate.equals(destinationCoordinate))) {
 			for(ICoordinate coordinate: allowedCorrectedDestinationList) {
-				if (sourceCoordinate.getXCoordinate()+direction.getXDelta()==coordinate.getXCoordinate() && 
-						sourceCoordinate.getYCoordinate()+direction.getYDelta()==coordinate.getYCoordinate()) {
+				ICoordinate nextPlayableCoordinate = findNextPlayableCoordinate(sourceCoordinate, destinationCoordinate, direction);
+				if(nextPlayableCoordinate.getXCoordinate()==coordinate.getXCoordinate() && nextPlayableCoordinate.getYCoordinate()==
+						coordinate.getYCoordinate()) {
 					path.add(coordinate);
-					//System.out.println("Adding to Path " + direction);
-					//printPathList(path, direction + " Path");
 					sourceCoordinate = coordinate;
 					break;
 				}
 			}
 		}
-		//printPathList(path, direction + " Path");
+		//printPathList(path, direction + " Path SONSSSSS");
 		return path;
+	}
+	
+	private ICoordinate findNextPlayableCoordinate(ICoordinate source, ICoordinate destination, Direction direction) {
+		ICoordinate temp = null;
+		while (source!=destination) {
+			int x = source.getXCoordinate()+direction.getXDelta();
+			int y = source.getYCoordinate()+direction.getYDelta();
+			temp = new Coordinate(x,y);
+			if(isCoordinateOnBoard(temp)) {
+				return temp;
+			} 
+			else
+				source = temp;
+		}
+		return temp;
 	}
 
 	protected double findCoordinateDistance(ICoordinate sourceCoordinate, ICoordinate destinationCoordinate) {
@@ -123,10 +138,9 @@ public class CoordinateBasedOperations {
 	protected boolean isCoordinateOnBoard(ICoordinate coordinate) {
 		int x = coordinate.getXCoordinate();
 		int y = coordinate.getYCoordinate();
-		// first check the bounds 
 		if ((x >= 0 && x <= board.maxOfDimensionX) && (y >= 0 && y <= board.maxOfDimensionY))
 			// second check if cell is 1
-			if (board.boardMatrix[x][y] == 1) return true;
+			if (board.boardMatrix[y][x] == 1) return true;
 			
 			
 		return false;
@@ -152,28 +166,31 @@ public class CoordinateBasedOperations {
 		//System.out.println("SOURCE: "+sourceCoordinate);
 		//printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List");
 		List<ICoordinate> secondJumpList = new ArrayList<>();
+		
 		for(ICoordinate destinationCoordinate : allowedCorrectedDestinationList) {
 			IMoveCoordinate moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);
-	    	if (board.getMBO().isJumpMove(piece, moveCoordinate)
+			if (board.getMBO().isJumpMove(piece, moveCoordinate)
 	    			&& !isPieceBlockedForJump(piece, destinationCoordinate)) {
+	    		
 	    		List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
-				//ICoordinate pathCoordinate = path.get(1);
-				//System.out.println("Path Coordinate " + pathCoordinate);
-				int howManyPiecesAreOnPath = 0;
+	    		
+				int numberOfPiecesOnPath = 0;
 				for(int i=1; i<path.size()-1;i++) {
+				
 					ICoordinate coordinateOnPath = path.get(i);
+					
 					AbstractPiece pieceAtCoord = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinateOnPath);
 					if(pieceAtCoord!=null) {
-						howManyPiecesAreOnPath++;
+						numberOfPiecesOnPath++;
 					}
 				}
-				if(howManyPiecesAreOnPath==1) {
+				if(numberOfPiecesOnPath==1) {
 					ICoordinate destination = path.get(path.size()-1);
 					secondJumpList.add(destination);
 				}
+				
 	    	}
 		}
-		//printCoordinateList(secondJumpList,"SECOND JUMP LIST");
 		return secondJumpList;
 	}
 	/*

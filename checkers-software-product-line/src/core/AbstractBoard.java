@@ -45,7 +45,6 @@ public abstract class AbstractBoard {
 		
 		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
 		List<ICoordinate> allowedCorrectedDestinationList = cbo.findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		
 		return cbo.containsDestinationCoordinateInCorrectedDestinationList(destinationCoordinate, allowedCorrectedDestinationList);
 	}
 

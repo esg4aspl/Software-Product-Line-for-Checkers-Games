@@ -110,7 +110,7 @@ public class TurkishReferee extends AbstractReferee{
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this) || 
+			endOfGameDraw = (isSatisfied(noPromoteRule, this)  || 
 					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
@@ -127,7 +127,7 @@ public class TurkishReferee extends AbstractReferee{
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this) || 
+			endOfGameDraw = (isSatisfied(noPromoteRule, this)  || 
 					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
 			
 			System.out.println("End Of Game? " + endOfGame);
@@ -236,7 +236,7 @@ public class TurkishReferee extends AbstractReferee{
 	
 	private List<ICoordinate> findAllowedJumpListWithOpponentPieceOnPath(AbstractPiece piece){
 		List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
-		getBoard().getCBO().printPathList(jumpList, "-----------deniz abe");
+		
 		List<ICoordinate> allowedJumpList = new ArrayList<ICoordinate>();
 		for(ICoordinate destinationCoordinate : jumpList) {
 			IMoveCoordinate moveCoordinate = new MoveCoordinate(piece.getCurrentCoordinate(), destinationCoordinate);

@@ -1,6 +1,7 @@
 package checkerschinese;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import core.*;
@@ -68,7 +69,7 @@ public class Referee extends AbstractReferee {
 			}
 		}
 		
-		// coordinatePieceMap.printPieceMap();
+	    coordinatePieceMap.printPieceMap();
 		System.out.println(playerList.getPlayerStatus());
 	}
 	
@@ -82,7 +83,7 @@ public class Referee extends AbstractReferee {
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			//endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -97,8 +98,8 @@ public class Referee extends AbstractReferee {
 			}
 			consoleView.drawBoardView();
 
-			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this));
+			endOfGameDraw = false;
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
@@ -141,14 +142,12 @@ public class Referee extends AbstractReferee {
 		ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
 		AbstractPiece piece = coordinatePieceMap.getPieceAtCoordinate(sourceCoordinate);
 		if (!checkMove()) return false;
+		System.out.println(currentMoveCoordinate+" current move corrd");
 		List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
-		//if piece become king then terminate the move
-		AbstractPiece  temp  = piece;
+		
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-		if(!temp.equals(piece))
-			moveOpResult = new MoveOpResult(true, false);
 		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 			conductCurrentPlayerTurnAgain(moveOpResult, piece);
@@ -157,14 +156,26 @@ public class Referee extends AbstractReferee {
 
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
 		AbstractPiece temp  = piece;
+		
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
-			List<ICoordinate> secondJumpList = board.getCBO().findAllowedContinousJumpList(piece);
-			board.getCBO().printPathList(secondJumpList, "Second Jump List");
+			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();		
+			List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
+			
+			Direction lastMoveDirection = board.getCBO().findDirection(currentMoveCoordinate.getSourceCoordinate(),currentMoveCoordinate.getDestinationCoordinate());
+			
+			for(ICoordinate destinationCoordinate : jumpList) {
+				Direction newDirection = board.getCBO().findDirection(currentMoveCoordinate.getDestinationCoordinate(), destinationCoordinate);
+				if(!lastMoveDirection.getOppositeDirection().equals(newDirection) )
+					secondJumpList.add(destinationCoordinate);	
+			}
+			
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;
 			}
-			currentMoveCoordinate = consoleView.getNextMove(currentPlayer);
+			
+			board.getCBO().printPathList(secondJumpList, "Second Jump List");
+			currentMoveCoordinate = consoleView.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
 			ICoordinate sourceCoordinate = currentMoveCoordinate.getSourceCoordinate();
 			ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
 			if (!checkMove()) continue;
@@ -184,12 +195,12 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected boolean checkMove() {
-		return isSatisfied(new RuleIfJumpMoveThenJumpedPieceMustBe(), this) 
-				&& isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
+		return  isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
 				&& isSatisfied(new RuleThereMustNotBePieceAtDestinationCoordinate(), this)
 				&& isSatisfied(new RulePieceAtSourceCoordinateMustBelongToCurrentPlayer(), this)
 				&& isSatisfied(new RuleDestinationCoordinateMustBeValidForCurrentPiece(), this)
-				&& isSatisfied(new RuleMoveMustMatchPieceMoveConstraints(), this);
+				&& isSatisfied(new RuleMoveMustMatchPieceMoveConstraints(), this)
+				&& isSatisfied(new RuleIfJumpMoveThenJumpedPieceMustBe(), this);
 	}
 
 	protected MoveOpResult moveInterimOperation(AbstractPiece piece, IMoveCoordinate moveCoordinate, List<ICoordinate> path) {

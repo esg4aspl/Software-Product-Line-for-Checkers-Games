@@ -15,7 +15,7 @@ public class MoveFileReader {
 	private Scanner sc;
 
 	public MoveFileReader() {
-		filename = "TurkishBecomeKingAfterCaptureAllPossiblePieceTest";
+		filename = "completeGameForTurkish";
 	    file = new File(filename); 
 	  	try {
 			sc = new Scanner(file);

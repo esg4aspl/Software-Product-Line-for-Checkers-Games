@@ -12,8 +12,8 @@ public class RuleIfJumpMoveThenJumpedPieceMustBe implements IRule {
 		AbstractPiece piece = coordinatePieceMap.getPieceAtCoordinate(sourceCoordinate);
 		AbstractBoard board = referee.getBoard();
 		if (board.getMBO().isJumpMove(piece, moveCoordinate)) {
+			System.out.println(" SEYIN ICI " + piece+ " Move: "+moveCoordinate);
 			List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
-
 			int howManyPieceAreOnPath = 0;
 			for(int i=1; i<path.size()-1; i++) {
 				ICoordinate coordinateOnPath = path.get(i);

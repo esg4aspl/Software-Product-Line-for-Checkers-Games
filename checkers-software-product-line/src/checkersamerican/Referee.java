@@ -14,7 +14,7 @@ public class Referee extends AbstractReferee {
 
 	public Referee(AbstractGameConfiguration checkersGameConfiguration) {
 		super(checkersGameConfiguration);
-		automaticGameOn = false;
+		automaticGameOn = true;
 	}
 		
 	public void setup() {
@@ -68,14 +68,14 @@ public class Referee extends AbstractReferee {
 			}
 		}
 		
-		// coordinatePieceMap.printPieceMap();
+		coordinatePieceMap.printPieceMap();
 		System.out.println(playerList.getPlayerStatus());
 	}
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean endOfGameDraw = false;
-		boolean startWithAutomaticGame = false;
+		boolean startWithAutomaticGame = true;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
 		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
 
@@ -98,7 +98,7 @@ public class Referee extends AbstractReferee {
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			//endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
