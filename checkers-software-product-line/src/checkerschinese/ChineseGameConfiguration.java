@@ -5,7 +5,7 @@ import core.*;
 public class ChineseGameConfiguration extends AbstractGameConfiguration {
 
 	public int getNumberOfPlayers() {
-		return 6;
+		return 3;
 	}
 	
 	public int getNumberOfPiecesPerPlayer() {

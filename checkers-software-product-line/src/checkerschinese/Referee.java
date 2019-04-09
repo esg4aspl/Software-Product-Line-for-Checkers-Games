@@ -83,27 +83,23 @@ public class Referee extends AbstractReferee {
 	
 	private Direction[] createDirections(int numberOfPlayers) {
 		if(numberOfPlayers==2)
-			return new Direction[] {Direction.S,Direction.N};
+			return new Direction[] {Direction.N, Direction.E};
 		else if(numberOfPlayers==3)
-			return new Direction[] {Direction.NE,Direction.NW,Direction.S};
+			return new Direction[] {Direction.S, Direction.NE, Direction.NW};
 		else if(numberOfPlayers==4)
-			return new Direction[] {Direction.NE,Direction.NW,Direction.SE,Direction.SW};
+			return new Direction[] {Direction.NE, Direction.NW, Direction.SE, Direction.SW};
 		else if(numberOfPlayers==6)
-			return new Direction[] {Direction.NE,Direction.N,Direction.NW,Direction.SW,Direction.S,Direction.SE};
+			return new Direction[] {Direction.NE, Direction.N, Direction.NW, Direction.SW, Direction.S, Direction.SE};
 		return null;
 	}
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean endOfGameDraw = false;
 		boolean startWithAutomaticGame = false;
-		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
-		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
 
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
-			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			//endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGame = (isSatisfied(new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates(), this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -118,11 +114,10 @@ public class Referee extends AbstractReferee {
 			}
 			consoleView.drawBoardView();
 
-			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this));
-			endOfGameDraw = false;
+			endOfGame = (isSatisfied(new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates(), this));
 			
 			System.out.println("End Of Game? " + endOfGame);
-			if (endOfGame || endOfGameDraw) break;
+			if (endOfGame) break;
 			
 			currentPlayerID++;
 			if (currentPlayerID >= numberOfPlayers) currentPlayerID = 0;
@@ -130,10 +125,7 @@ public class Referee extends AbstractReferee {
 		} 
 		//consoleView.drawBoardView();
 		
-		if(endOfGameDraw)
-			System.out.println("DRAW\n" + announceDraw());
-		else
-			System.out.println("WINNER " + announceWinner());
+		System.out.println("WINNER " + announceWinner());
 		
 		consoleView.closeFile();
 		System.exit(0);
@@ -176,39 +168,46 @@ public class Referee extends AbstractReferee {
 
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
 		AbstractPiece temp  = piece;
-		
+
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
 			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();		
 			List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
-			
+
 			Direction lastMoveDirection = board.getCBO().findDirection(currentMoveCoordinate.getSourceCoordinate(),currentMoveCoordinate.getDestinationCoordinate());
-			
+
 			for(ICoordinate destinationCoordinate : jumpList) {
 				Direction newDirection = board.getCBO().findDirection(currentMoveCoordinate.getDestinationCoordinate(), destinationCoordinate);
 				if(!lastMoveDirection.getOppositeDirection().equals(newDirection) )
 					secondJumpList.add(destinationCoordinate);	
 			}
-			
+
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;
 			}
-			
+
 			board.getCBO().printPathList(secondJumpList, "Second Jump List");
 			currentMoveCoordinate = consoleView.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
 			ICoordinate sourceCoordinate = currentMoveCoordinate.getSourceCoordinate();
 			ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
-			if (!checkMove()) continue;
-			moveOpResult = new MoveOpResult(false, false);
-			for(ICoordinate coordinate : secondJumpList) {
-				if (coordinate.equals(destinationCoordinate)) {
-					List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
-					coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
-					moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
-					piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-					if(!temp.equals(piece)) 
-						moveOpResult = new MoveOpResult(true, false);
-				}
+
+			// if player select same coordinate, turn will be terminated
+			if(sourceCoordinate.equals(destinationCoordinate)) 
+				moveOpResult = new MoveOpResult(false, false);
+			else{
+				if (!checkMove()) continue;
+				moveOpResult = new MoveOpResult(false, false);
+				for(ICoordinate coordinate : secondJumpList) {
+					if (coordinate.equals(destinationCoordinate)) {
+						List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
+						coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
+						moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
+						piece = becomeAndOrPutOperation(piece, destinationCoordinate);
+						if(!temp.equals(piece)) 
+							moveOpResult = new MoveOpResult(true, false);
+					}
+				}				
+
 			}
 		}
 		return true;
