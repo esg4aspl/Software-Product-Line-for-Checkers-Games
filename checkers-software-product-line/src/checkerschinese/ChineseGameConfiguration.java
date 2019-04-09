@@ -1,11 +1,11 @@
-package base;
+package checkerschinese;
 
 import core.*;
 
 public class ChineseGameConfiguration extends AbstractGameConfiguration {
 
 	public int getNumberOfPlayers() {
-		return 2;
+		return 6;
 	}
 	
 	public int getNumberOfPiecesPerPlayer() {

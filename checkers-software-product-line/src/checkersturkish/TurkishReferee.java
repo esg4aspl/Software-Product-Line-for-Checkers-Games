@@ -93,7 +93,7 @@ public class TurkishReferee extends AbstractReferee{
 			for (int j = 0; j < numberOfPiecesPerPlayer; j++) {
 				men = new Pawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
 				player.addPiece(men);
-				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate(i));
+				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 			}
 		}
 		// coordinatePieceMap.printPieceMap();

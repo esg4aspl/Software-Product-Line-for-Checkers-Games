@@ -3,6 +3,7 @@ package checkerschinese;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import core.*;
 import base.*;
@@ -12,6 +13,8 @@ public class Referee extends AbstractReferee {
 
 	protected ChineseCheckersBoardConsoleView consoleView;
 	protected boolean automaticGameOn;
+	private String[] icons; 
+	private Direction[] directions;
 
 	public Referee(AbstractGameConfiguration checkersGameConfiguration) {
 		super(checkersGameConfiguration);
@@ -28,12 +31,19 @@ public class Referee extends AbstractReferee {
 		numberOfPlayers = gameConfiguration.getNumberOfPlayers();
 		numberOfPiecesPerPlayer = gameConfiguration.getNumberOfPiecesPerPlayer();
 		playerList = new PlayerList();
-		IPlayer player0 = new Player(0, Color.BLACK);
-		playerList.addPlayer(player0);
-		IPlayer player1 = new Player(1, Color.WHITE);
-		playerList.addPlayer(player1);
+		for(int i=0; i<numberOfPlayers; i++) {
+			playerList.addPlayer(new Player(i, getRandomColor()));
+		}
 		currentPlayerID = 0;
-		currentPlayer = player0;
+		currentPlayer = playerList.getPlayer(0);
+	}
+	
+	private Color getRandomColor() {
+		Random random = new Random();
+        int r = random.nextInt(255);
+        int g = random.nextInt(255);
+        int b = random.nextInt(255);
+        return new Color(r, g, b);
 	}
 
 	private void setupBoardMVC() {
@@ -43,10 +53,13 @@ public class Referee extends AbstractReferee {
 	}
 
 	private void setupPiecesOnBoard() {
+		icons = new String[]{"#","$","%","?","=","@"};
+		directions = createDirections(numberOfPlayers);
 		// create pieces for players and put them on board
+		StartCoordinateFactory startCoordinateFactory = new StartCoordinateFactory();
 		IPlayer player;
 		AbstractPiece men;
-		ChineseStartCoordinates startCoordinates = new ChineseStartCoordinates();
+		StartCoordinates startCoordinates = startCoordinateFactory.getStartCoordinates(numberOfPlayers,numberOfPiecesPerPlayer);
 		IPieceMovePossibilities menMovePossibilities = new ChinesePawnMovePossibilities();
 		IPieceMoveConstraints menMoveConstraints =  new ChinesePawnMoveConstraints();
 
@@ -54,23 +67,30 @@ public class Referee extends AbstractReferee {
 			player = playerList.getPlayer(i);
 			String icon;
 			Direction direction;
-			if (i == 0) {
-				icon = "B";
-				direction = Direction.N;
-			}
-			else {
-				icon = "W";
-				direction = Direction.S;
-			}
+			icon = icons[i];
+			System.out.println("Player "+i+" "+icon);
+			direction = directions[i];
 			for (int j = 0; j < numberOfPiecesPerPlayer; j++) {
 				men = new ChinesePawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
 				player.addPiece(men);
-				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate(i));
+				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 			}
 		}
 		
 	    coordinatePieceMap.printPieceMap();
 		System.out.println(playerList.getPlayerStatus());
+	}
+	
+	private Direction[] createDirections(int numberOfPlayers) {
+		if(numberOfPlayers==2)
+			return new Direction[] {Direction.S,Direction.N};
+		else if(numberOfPlayers==3)
+			return new Direction[] {Direction.NE,Direction.NW,Direction.S};
+		else if(numberOfPlayers==4)
+			return new Direction[] {Direction.NE,Direction.NW,Direction.SE,Direction.SW};
+		else if(numberOfPlayers==6)
+			return new Direction[] {Direction.NE,Direction.N,Direction.NW,Direction.SW,Direction.S,Direction.SE};
+		return null;
 	}
 	
 	public void conductGame() {		
