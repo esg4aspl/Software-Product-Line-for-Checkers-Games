@@ -98,7 +98,7 @@ public class Referee extends AbstractReferee {
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
-			//endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
