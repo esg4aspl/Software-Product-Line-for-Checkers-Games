@@ -26,5 +26,18 @@ public class MoveCoordinate implements IMoveCoordinate {
 				String.valueOf(destinationCoordinate.getYCoordinate());
 		return "(" + sc + ")->("+ dc + ")";
 	}
-
+	
+	/*
+	 * This method is used by contains method of List interface 
+	 * so it is overridden in order to run properly when contains method is used.
+	 * */
+	@Override
+	public boolean equals(Object obj) {
+		//if two moves has same source and destination coordinate then they are equal.
+		IMoveCoordinate moveCoordinate = (IMoveCoordinate)obj;
+		return moveCoordinate.getDestinationCoordinate().equals(getDestinationCoordinate()) &&
+				moveCoordinate.getSourceCoordinate().equals(getSourceCoordinate());
+	}
+	
+	
 }

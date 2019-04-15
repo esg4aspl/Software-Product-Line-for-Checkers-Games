@@ -1,13 +1,13 @@
 package checkersturkish;
 
 import base.*;
+import core.AbstractReferee;
 
 public class TurkishCheckersApp {
 
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) {		
 		TurkishGameConfiguration gameConfiguration = new TurkishGameConfiguration();
-		Referee referee = new Referee(gameConfiguration);
+		AbstractReferee referee = new TurkishReferee(gameConfiguration);
 		referee.setup();
 		referee.conductGame();
 	}

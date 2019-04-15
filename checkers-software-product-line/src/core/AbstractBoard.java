@@ -45,10 +45,18 @@ public abstract class AbstractBoard {
 		
 		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
 		List<ICoordinate> allowedCorrectedDestinationList = cbo.findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		
 		return cbo.containsDestinationCoordinateInCorrectedDestinationList(destinationCoordinate, allowedCorrectedDestinationList);
 	}
 
+	public boolean isCoordinateOnBoard(ICoordinate coordinate) {
+		int coordinateX = coordinate.getXCoordinate();
+		int coordinateY = coordinate.getYCoordinate();
+		if((maxOfDimensionX >= coordinateX) && (maxOfDimensionY >= coordinateY) && (coordinateX >= 0 && coordinateY >= 0))
+			return true;
+		else
+			return false;
+	}
+	
 	public CoordinatePieceMap getCoordinatePieceMap() {
 		return coordinatePieceMap;
 	}
@@ -59,5 +67,14 @@ public abstract class AbstractBoard {
 
 	public MoveBasedOperations getMBO() {
 		return mbo;
+	}
+	
+	public boolean isPlayableCoordinate(ICoordinate coordinate) {
+		int coordinateX = coordinate.getXCoordinate();
+		int coordinateY = coordinate.getYCoordinate();
+		if(boardMatrix[coordinateY][coordinateX]==1)
+			return true;
+		else
+			return false;
 	}
 }

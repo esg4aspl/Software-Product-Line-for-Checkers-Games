@@ -3,6 +3,8 @@ package base;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import core.*;
 import utils.*;
@@ -81,27 +83,97 @@ public class AmericanCheckersBoardConsoleView {
 		return piece.getIcon();
 	}
 	
-	public IMoveCoordinate getNextMove(IPlayer currentPlayer) {
-		System.out.println("Enter Source Coordinate x,y for Player " + currentPlayer.getId());
-		String sc = scanner.nextLine(); 
-		System.out.println("Enter Destination Coordinate x,y for Player " + currentPlayer.getId());
-		String dc = scanner.nextLine(); 
+	private ICoordinate inputHelper(String message) {
+		System.out.println(message);
+		String coordinate = scanner.nextLine(); 
 		
-		int scx = Integer.parseInt(sc.substring(0, 1));
-		int scy = Integer.parseInt(sc.substring(2, 3));
-		ICoordinate sourceCoordinate = new Coordinate(scx, scy);
-
-		int dcx = Integer.parseInt(dc.substring(0, 1));
-		int dcy = Integer.parseInt(dc.substring(2, 3));
-		ICoordinate destinationCoordinate = new Coordinate(dcx, dcy);
-
-		IMoveCoordinate moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);
-		AbstractMove move = new Move(currentPlayer, moveCoordinate);
-		if (scx==9 && scy==9 && dcx==9 && dcy==9) {
-			moveFileWriter.closeFile();
-			System.exit(0);
+		//this pattern provide the input (number)(any number of non numerical character)(number)
+		Pattern patternForInput = Pattern.compile("\\d+\\D+\\d+");
+		//this is used to provide the extract numbers from string
+		Pattern extract = Pattern.compile("\\d+");
+		
+		Matcher matchForInput = patternForInput.matcher(coordinate);
+		boolean flagForinput = matchForInput.matches();
+		while(!flagForinput) {
+			System.out.println("Pattern for input is (Number)(Any number of non-numeric character)(Number)");
+			System.out.println(message);
+			coordinate = scanner.nextLine(); 
+			matchForInput = patternForInput.matcher(coordinate);
+			flagForinput = matchForInput.matches();
 		}
-		else moveFileWriter.writeMoveToFile(move);
+		
+		Matcher matcherNumeric = extract.matcher(coordinate);
+		matcherNumeric.find();
+		int coordinatex = Integer.parseInt(matcherNumeric.group());
+		matcherNumeric.find();
+		int coordinatey = Integer.parseInt(matcherNumeric.group());
+		return new Coordinate(coordinatex, coordinatey);
+	}
+	
+	public IMoveCoordinate getNextMove(IPlayer currentPlayer, ICoordinate newSourceCoordinate) {
+		boolean flag = false;
+		IMoveCoordinate moveCoordinate = null;
+		while(!flag) {
+			flag = true;
+			ICoordinate sourceCoordinate = newSourceCoordinate;
+			ICoordinate destinationCoordinate = inputHelper("Enter Destination Coordinate x,y for Player " + currentPlayer.getId());
+			int scx = sourceCoordinate.getXCoordinate();
+			int scy = sourceCoordinate.getYCoordinate();
+			int dcx = sourceCoordinate.getXCoordinate();
+			int dcy = sourceCoordinate.getYCoordinate();
+	
+			moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);		
+			AbstractMove move = new Move(currentPlayer, moveCoordinate);
+			
+			if (scx==9 && scy==9 && dcx==9 && dcy==9) {
+				moveFileWriter.closeFile();
+				System.exit(0);
+			}
+			else 
+			{
+				if(checkersBoard.isCoordinateOnBoard(sourceCoordinate) && checkersBoard.isCoordinateOnBoard(destinationCoordinate)) 
+					moveFileWriter.writeMoveToFile(move);
+				else {
+					flag = false;   
+					System.out.println("Coordinate must be on the board!");
+				}
+						
+			}
+		}
+		return moveCoordinate;
+	}
+	
+	
+	public IMoveCoordinate getNextMove(IPlayer currentPlayer) {
+		boolean flag = false;
+		IMoveCoordinate moveCoordinate = null;
+		while(!flag) {
+			flag = true;
+			ICoordinate sourceCoordinate = inputHelper("Enter Source Coordinate x,y for Player " + currentPlayer.getId());
+			ICoordinate destinationCoordinate = inputHelper("Enter Destination Coordinate x,y for Player " + currentPlayer.getId());
+			int scx = sourceCoordinate.getXCoordinate();
+			int scy = sourceCoordinate.getYCoordinate();
+			int dcx = sourceCoordinate.getXCoordinate();
+			int dcy = sourceCoordinate.getYCoordinate();
+	
+			moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);		
+			AbstractMove move = new Move(currentPlayer, moveCoordinate);
+			
+			if (scx==9 && scy==9 && dcx==9 && dcy==9) {
+				moveFileWriter.closeFile();
+				System.exit(0);
+			}
+			else 
+			{
+				if(checkersBoard.isCoordinateOnBoard(sourceCoordinate) && checkersBoard.isCoordinateOnBoard(destinationCoordinate)) 
+					moveFileWriter.writeMoveToFile(move);
+				else {
+					flag = false;   
+					System.out.println("Coordinate must be on the board!");
+				}
+						
+			}
+		}
 		return moveCoordinate;
 	}
 

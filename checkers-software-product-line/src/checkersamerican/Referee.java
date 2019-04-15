@@ -14,7 +14,7 @@ public class Referee extends AbstractReferee {
 
 	public Referee(AbstractGameConfiguration checkersGameConfiguration) {
 		super(checkersGameConfiguration);
-		automaticGameOn = false;
+		automaticGameOn = true;
 	}
 		
 	public void setup() {
@@ -45,7 +45,7 @@ public class Referee extends AbstractReferee {
 		// create pieces for players and put them on board
 		IPlayer player;
 		AbstractPiece men;
-		AmericanStartCoordinates startCoordinates = new AmericanStartCoordinates();
+		StartCoordinates startCoordinates = new AmericanStartCoordinates();
 		IPieceMovePossibilities menMovePossibilities = new PawnMovePossibilities();
 		IPieceMoveConstraints menMoveConstraints =  new PawnMoveConstraints();
 
@@ -64,20 +64,25 @@ public class Referee extends AbstractReferee {
 			for (int j = 0; j < numberOfPiecesPerPlayer; j++) {
 				men = new Pawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
 				player.addPiece(men);
-				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate(i));
+				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 			}
 		}
 		
-		// coordinatePieceMap.printPieceMap();
+		coordinatePieceMap.printPieceMap();
 		System.out.println(playerList.getPlayerStatus());
 	}
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
+		boolean endOfGameDraw = false;
 		boolean startWithAutomaticGame = true;
+		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
+		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
+
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
-			endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
+			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -91,15 +96,24 @@ public class Referee extends AbstractReferee {
 				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
-			endOfGame = isSatisfied(new RuleEndOfGameGeneral(), this);
+
+			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
+			endOfGameDraw = (isSatisfied(noPromoteRule, this) || isSatisfied(noPieceCapturedForFortyTurn, this));
+			
 			System.out.println("End Of Game? " + endOfGame);
-			if (endOfGame) break;
+			if (endOfGame || endOfGameDraw) break;
 			
 			currentPlayerID++;
 			if (currentPlayerID >= numberOfPlayers) currentPlayerID = 0;
 			currentPlayer = getPlayerbyID(currentPlayerID);
 		} 
-		announceWinner();
+		//consoleView.drawBoardView();
+		
+		if(endOfGameDraw)
+			System.out.println("DRAW\n" + announceDraw());
+		else
+			System.out.println("WINNER " + announceWinner());
+		
 		consoleView.closeFile();
 		System.exit(0);
 	}
@@ -130,7 +144,11 @@ public class Referee extends AbstractReferee {
 		List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
+		//if piece become king then terminate the move
+		AbstractPiece  temp  = piece;
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
+		if(!temp.equals(piece))
+			moveOpResult = new MoveOpResult(true, false);
 		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 			conductCurrentPlayerTurnAgain(moveOpResult, piece);
@@ -138,6 +156,7 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
+		AbstractPiece temp  = piece;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
 			List<ICoordinate> secondJumpList = board.getCBO().findAllowedContinousJumpList(piece);
 			board.getCBO().printPathList(secondJumpList, "Second Jump List");
@@ -156,6 +175,8 @@ public class Referee extends AbstractReferee {
 					coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 					moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 					piece = becomeAndOrPutOperation(piece, destinationCoordinate);
+					if(!temp.equals(piece)) 
+						moveOpResult = new MoveOpResult(true, false);
 				}
 			}
 		}
@@ -163,7 +184,8 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected boolean checkMove() {
-		return isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
+		return isSatisfied(new RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat(), this)
+				&& isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
 				&& isSatisfied(new RuleThereMustNotBePieceAtDestinationCoordinate(), this)
 				&& isSatisfied(new RulePieceAtSourceCoordinateMustBelongToCurrentPlayer(), this)
 				&& isSatisfied(new RuleDestinationCoordinateMustBeValidForCurrentPiece(), this)
@@ -189,11 +211,13 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected AbstractPiece becomeAndOrPutOperation(AbstractPiece piece, ICoordinate destinationCoordinate) {
-		if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7)
-				|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0)) {
-			IPlayer player = piece.getPlayer();
-			piece = becomeNewPiece(player, piece);
-		}
+		//check the piece is already king or not
+		if(!(piece instanceof King))
+			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
+					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
+				IPlayer player = piece.getPlayer();
+				piece = becomeNewPiece(player, piece);
+			}
 		coordinatePieceMap.putPieceToCoordinate(piece, destinationCoordinate);
 		return piece;
 	}
@@ -214,6 +238,10 @@ public class Referee extends AbstractReferee {
 	
 	public IPlayer announceWinner() {
 		return playerList.getPlayer(currentPlayerID);
+	}
+	
+	public IPlayerList announceDraw(){
+		return playerList;
 	}
 	
 	public IPlayer getCurrentPlayer() {

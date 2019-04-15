@@ -17,7 +17,7 @@ public class MoveFileWriter {
 	
 	public MoveFileWriter() {
 		Date date = Calendar.getInstance().getTime();
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd-hh-mm");
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh-mm");
 		filename = "movelist-" + dateFormat.format(date);
 
 		try {

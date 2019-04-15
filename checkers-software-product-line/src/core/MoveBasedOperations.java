@@ -1,5 +1,7 @@
 package core;
 
+import java.util.List;
+
 public class MoveBasedOperations {
 
 	protected AbstractBoard board;
@@ -9,12 +11,25 @@ public class MoveBasedOperations {
 		this.board = board;
 		this.cbo = cbo;
 	}
-
+	
 	public boolean isJumpMove(AbstractPiece piece, IMoveCoordinate moveCoordinate) {
-		ICoordinate sourceCoordinate = moveCoordinate.getSourceCoordinate();
-		ICoordinate destinationCoordinate = moveCoordinate.getDestinationCoordinate();
-		if (cbo.findCoordinateDistance(sourceCoordinate, destinationCoordinate) >= 2.0)
+		
+		List<ICoordinate> path  = cbo.findPath(piece, moveCoordinate);
+		//number of playable coordinate doesn't count destination and source coordinate 
+		int numberOfPlayableCoordinate = 0;
+		for(int i=1; i<path.size()-1;i++) {
+			if(board.isPlayableCoordinate(path.get(i))) {
+				numberOfPlayableCoordinate++;
+				System.out.println(path.get(i));
+			}
+				
+		}
+		
+		if(numberOfPlayableCoordinate>=1)
 			return true;
-		else return false;
+		return false;
+		
 	}
+	
+	
 }
