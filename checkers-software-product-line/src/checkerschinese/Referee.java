@@ -83,7 +83,7 @@ public class Referee extends AbstractReferee {
 	
 	private Direction[] createDirections(int numberOfPlayers) {
 		if(numberOfPlayers==2)
-			return new Direction[] {Direction.N, Direction.E};
+			return new Direction[] {Direction.N, Direction.S};
 		else if(numberOfPlayers==3)
 			return new Direction[] {Direction.S, Direction.NE, Direction.NW};
 		else if(numberOfPlayers==4)
@@ -96,10 +96,10 @@ public class Referee extends AbstractReferee {
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean startWithAutomaticGame = false;
-
+		IRule endRule = new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates();
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
-			endOfGame = (isSatisfied(new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates(), this));
+			endOfGame = (isSatisfied(endRule, this));
 			System.out.println("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
@@ -114,7 +114,7 @@ public class Referee extends AbstractReferee {
 			}
 			consoleView.drawBoardView();
 
-			endOfGame = (isSatisfied(new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates(), this));
+			endOfGame = (isSatisfied(endRule, this));
 			
 			System.out.println("End Of Game? " + endOfGame);
 			if (endOfGame) break;
