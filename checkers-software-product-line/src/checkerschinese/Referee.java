@@ -18,7 +18,7 @@ public class Referee extends AbstractReferee {
 
 	public Referee(AbstractGameConfiguration checkersGameConfiguration) {
 		super(checkersGameConfiguration);
-		automaticGameOn = false;
+		automaticGameOn = true;
 	}
 		
 	public void setup() {
@@ -95,7 +95,7 @@ public class Referee extends AbstractReferee {
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean startWithAutomaticGame = false;
+		boolean startWithAutomaticGame = true;
 		IRule endRule = new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates();
 		if (startWithAutomaticGame) {
 			conductAutomaticGame();
