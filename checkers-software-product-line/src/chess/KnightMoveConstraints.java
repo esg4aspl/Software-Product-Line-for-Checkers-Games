@@ -14,6 +14,8 @@ public class KnightMoveConstraints implements IPieceMoveConstraints {
 		case S: return true;
 		case E: return true;
 		case W: return true;
+		//case NNW: return true;
+		//case NNE: return true;
 		default: break;
 		}
 		return false;
@@ -29,6 +31,8 @@ public class KnightMoveConstraints implements IPieceMoveConstraints {
 		case S: return false;
 		case E: return false;
 		case W: return false;
+		//case NNW: return true;
+		//case NNE: return true;
 		default: break;
 		}
 		return false;

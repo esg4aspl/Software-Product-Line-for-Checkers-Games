@@ -6,9 +6,9 @@ public class PawnMoveConstraints implements IPieceMoveConstraints {
 
 	public boolean isSingleSquareMarchMoveAllowed(Direction direction) {
 		switch(direction) {
-		case NE: return false;
+		case NE: return true;
 		case SE: return false;
-		case NW: return false;
+		case NW: return true;
 		case SW: return false;
 		case N: return true;
 		case S: return false;
