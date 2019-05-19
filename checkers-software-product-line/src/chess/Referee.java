@@ -9,13 +9,11 @@ import base.*;
 import rules.*;
 
 public class Referee extends AbstractReferee {
-
 	protected ChessBoardConsoleView consoleView;
-	protected boolean automaticGameOn;
 
-	public Referee(AbstractGameConfiguration checkersGameConfiguration) {
+	public Referee(IGameConfiguration checkersGameConfiguration) {
 		super(checkersGameConfiguration);
-		automaticGameOn = true;
+		view = new GUI("GUI", this);
 	}
 
 	public void setup() {
@@ -49,8 +47,8 @@ public class Referee extends AbstractReferee {
 		StartCoordinates startCoordinates = new ChessStartCoordinates();
 		IPieceMovePossibilities menMovePossibilities = new PawnMovePossibilities();
 		IPieceMoveConstraints menMoveConstraints =  new PawnMoveConstraints();
-		IPieceMovePossibilities rookMovePossibilities = new PawnMovePossibilities();
-		IPieceMoveConstraints rookMoveConstraints =  new PawnMoveConstraints();
+		IPieceMovePossibilities rookMovePossibilities = new RookMovePossibilities();
+		IPieceMoveConstraints rookMoveConstraints =  new RookMoveConstraints();
 		IPieceMovePossibilities knightMovePossibilities = new KnightMovePossibilities();
 		IPieceMoveConstraints knightMoveConstraints =  new KnightMoveConstraints();
 		IPieceMovePossibilities bishopMovePossibilities = new BishopMovePossibilities();
@@ -74,40 +72,40 @@ public class Referee extends AbstractReferee {
 			}
 
 			//------ should be changed ------
-			men = new Rook(0, "R"+i, player, direction, rookMovePossibilities, rookMoveConstraints);
+			men = new Rook((i*7)+i+2, "R"+i, player, direction, rookMovePossibilities, rookMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
-			men = new Knight(0, "k"+i, player, direction, knightMovePossibilities, knightMoveConstraints);
+			men = new Knight((i*7)+i+3, "k"+i, player, direction, knightMovePossibilities, knightMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
-			men = new Bishop(0, "B"+i, player, direction, bishopMovePossibilities, bishopMoveConstraints);
+			men = new Bishop((i*7)+i+4, "B"+i, player, direction, bishopMovePossibilities, bishopMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
-			men = new King(0, "K"+i, player, direction, kingMovePossibilities, kingMoveConstraints);
+			men = new King((i*7)+i+5, "K"+i, player, direction, kingMovePossibilities, kingMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
-			men = new Queen(0, "Q"+i, player, direction, queenMovePossibilities, queenMoveConstraints);
+			men = new Queen((i*7)+i+6, "Q"+i, player, direction, queenMovePossibilities, queenMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
-			men = new Bishop(0, "B"+i, player, direction, bishopMovePossibilities, bishopMoveConstraints);
+			men = new Bishop((i*7)+i+7, "B"+i, player, direction, bishopMovePossibilities, bishopMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());			
 
-			men = new Knight(0, "k"+i, player, direction, knightMovePossibilities, knightMoveConstraints);
+			men = new Knight((i*7)+i+8, "k"+i, player, direction, knightMovePossibilities, knightMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
-			men = new Rook(0, "R"+i, player, direction, rookMovePossibilities, rookMoveConstraints);
+			men = new Rook((i*7)+i+9, "R"+i, player, direction, rookMovePossibilities, rookMoveConstraints);
 			player.addPiece(men);
 			coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 
 			for (int j = 0; j < numberOfPiecesPerPlayer/2; j++) {
-				men = new Pawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
+				men = new Pawn(i, icon, player, direction, menMovePossibilities, menMoveConstraints);
 				player.addPiece(men);
 				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 			}
@@ -115,54 +113,63 @@ public class Referee extends AbstractReferee {
 			//-------------------------------
 		}
 
-		coordinatePieceMap.printPieceMap();
-		System.out.println(playerList.getPlayerStatus());
+		//coordinatePieceMap.printPieceMap();
+		view.drawBoardView();
+		//view.printMessage(playerList.getPlayerStatus());
 	}
 
 	public void conductGame() {		
-		boolean endOfGame = false;
-		boolean startWithAutomaticGame = false;
-
-		if (startWithAutomaticGame) {
+		boolean endOfGame = false;	
+		
+		if (automaticGameOn) {
 			conductAutomaticGame();
-			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this));
-			System.out.println("End Of Game? " + endOfGame);
+			endOfGame = (isSatisfied(new RuleEndOfGameChess(), this));
+			view.printMessage("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
-			System.out.println(playerList.getPlayerStatus());
-			System.out.println("Game begins ...");
+		//	view.printMessage(playerList.getPlayerStatus()+"\n Game begins ...");
 			consoleView.drawBoardView();
 		}
 		while (!endOfGame) {
-			currentMoveCoordinate = consoleView.getNextMove(currentPlayer);
+			currentMoveCoordinate = view.getNextMove(currentPlayer);
 			while (!conductMove()) {
-				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
+				currentMoveCoordinate = view.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
 
-			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this));
+			endOfGame = (isSatisfied(new RuleEndOfGameChess(), this));
 
-			System.out.println("End Of Game? " + endOfGame);
+			view.printMessage("Turn : Player " + currentPlayer.getId());
 			if (endOfGame) break;
 
 			currentPlayerID++;
 			if (currentPlayerID >= numberOfPlayers) currentPlayerID = 0;
 			currentPlayer = getPlayerbyID(currentPlayerID);
 		} 
-		//consoleView.drawBoardView();
 
-		System.out.println("WINNER " + announceWinner());
-
+		view.printMessage("WINNER " + announceWinner());
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		consoleView.closeFile();
 		System.exit(0);
 	}
 
 	private void conductAutomaticGame() {				
-		System.out.println("Automatic Game begins ...");
+		view.printMessage("Automatic Game begins ...");
 		automaticGameOn = true;
 		int step = 0;
 		consoleView.drawBoardView();
 		while (step < consoleView.getSizeOfAutomaticMoveList()) {
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			currentMove = consoleView.getNextAutomaticMove(step);
 			currentMoveCoordinate = currentMove.getMoveCoordinate();
 			currentPlayer = currentMove.getPlayer();
@@ -172,7 +179,7 @@ public class Referee extends AbstractReferee {
 			step++;
 		}
 		automaticGameOn = false;
-		System.out.println("Automatic Game ends ...");
+		view.printMessage("Automatic Game ends ...");
 	}
 
 	protected boolean conductMove() {
@@ -181,23 +188,17 @@ public class Referee extends AbstractReferee {
 		AbstractPiece piece = coordinatePieceMap.getPieceAtCoordinate(sourceCoordinate);
 		if (!checkMove()) return false;
 		List<ICoordinate> path= new ArrayList<ICoordinate>();
-		if(piece instanceof Knight) {
-			path.add(sourceCoordinate);
-			path.add(destinationCoordinate);
-		}
-		else
-			path=board.getCBO().findPath(piece, currentMoveCoordinate);
-
+		path=board.getCBO().findPath(piece, currentMoveCoordinate);
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
-		System.out.println(path);
+
 		//if piece become king then terminate the move
 		AbstractPiece  temp  = piece;
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
 		if(!temp.equals(piece))
 			moveOpResult = new MoveOpResult(true, false);
-		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
+		view.printMessage("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		//if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 		//	conductCurrentPlayerTurnAgain(moveOpResult, piece);
 		return true;
@@ -207,7 +208,7 @@ public class Referee extends AbstractReferee {
 		AbstractPiece temp  = piece;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
 			List<ICoordinate> secondJumpList = board.getCBO().findAllowedContinousJumpList(piece);
-			board.getCBO().printPathList(secondJumpList, "Second Jump List");
+			board.getCBO().printCoordinateList(secondJumpList, "Second Jump List");
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;
@@ -235,49 +236,64 @@ public class Referee extends AbstractReferee {
 		return isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
 				&& isSatisfied(new RulePieceAtSourceCoordinateMustBelongToCurrentPlayer(), this)
 				&& isSatisfied(new RuleDestinationCoordinateMustBeValidForCurrentPiece(), this)
-				&& isSatisfied(new RuleMoveMustMatchPieceMoveConstraints(), this);
+				&& isSatisfied(new RuleMoveMustMatchPieceMoveConstraints(), this)
+				&& isSatisfied(new RulePawnOfChessCapturePieceInCrossMove(), this)
+				&& isSatisfied(new RulePawnOfChessNoCapturePieceInStraightMove(), this)
+				&& isSatisfied(new RuleIfPieceToBeCapturedThenItMustBeBelongsToOpponent(), this)
+				&& isSatisfied(new RuleThereMustBeNoPieceOnPath(), this)
+				&& isSatisfied(new RuleIsKingFree(), this);
 	}
 
 	protected MoveOpResult moveInterimOperation(AbstractPiece piece, IMoveCoordinate moveCoordinate, List<ICoordinate> path) {
 		IPlayer player = piece.getPlayer();
-		ICoordinate pathCoordinate = path.get(1);
-		System.out.println("Path Coordinate " + pathCoordinate);
+		ICoordinate pathCoordinate = path.get(path.size()-1);
 		AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);		
 		if (pieceAtPath!=null && !pieceAtPath.getPlayer().equals(player)) {
 			// capture piece at path
 			coordinatePieceMap.capturePieceAtCoordinate(pieceAtPath, pathCoordinate);
 			pieceAtPath.getPlayer().removePiece(pieceAtPath);
-			System.out.println(pieceAtPath.getPlayer().getPieceList().size());
 			return new MoveOpResult(true, true); // jumped over opponent team
 		}
 		return new MoveOpResult(true, false);
 	}
 
 	protected AbstractPiece becomeAndOrPutOperation(AbstractPiece piece, ICoordinate destinationCoordinate) {
-		/*	//check the piece is already king or not
-		if(!(piece instanceof King))
-			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
-					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
+		if(piece.getClass() == Pawn.class) {
+			IPlayer player = piece.getPlayer();
+			piece = becomeNewPiece(player, piece);				
+		}else if(piece instanceof Pawn) {
+			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7)
+					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0)){
 				IPlayer player = piece.getPlayer();
 				piece = becomeNewPiece(player, piece);
-			}
-		 */
+			}			
+		}
+
 		coordinatePieceMap.putPieceToCoordinate(piece, destinationCoordinate);
 		return piece;
 	}
 
 	protected AbstractPiece becomeNewPiece(IPlayer player, AbstractPiece piece) {
-		int pieceID = piece.getId();
-		Direction goalDirection = piece.getGoalDirection();
+		Direction goalDirection = piece.getGoalDirection();		
+		IPieceMovePossibilities pieceMovePossibilities;
+		IPieceMoveConstraints pieceMoveConstraints;
+		AbstractPiece newPiece = null;		
+		
+		if(piece.getClass() == Pawn.class) {
+			pieceMoveConstraints = new LimitedPawnMoveConstraints();
+			pieceMovePossibilities = new LimitedPawnMovePossibilities();
+			newPiece = new LimitedPawn(piece.getId(), piece.getIcon(), player, goalDirection, pieceMovePossibilities, pieceMoveConstraints);
+		}else {
+			pieceMovePossibilities = new QueenMovePossibilities();
+			pieceMoveConstraints =  new QueenMoveConstraints();
+			String icon = "Q"+player.getId();
+			newPiece = new Queen((player.getId()*7)+player.getId()+6, icon, player, goalDirection, pieceMovePossibilities , pieceMoveConstraints);			
+		}
+			
 		player.removePiece(piece);
-		IPieceMovePossibilities kingMovePossibilities = new KingMovePossibilities();
-		IPieceMoveConstraints kingMoveConstraints =  new KingMoveConstraints();
-		String icon;
-		if (player.getId() == 0) icon = "A";
-		else icon = "Z";
-		AbstractPiece king = new King(pieceID, icon, player, goalDirection, kingMovePossibilities, kingMoveConstraints);
-		player.addPiece(king);
-		return king;
+		player.addPiece(newPiece);
+		
+		return newPiece;
 	}
 
 	public IPlayer announceWinner() {

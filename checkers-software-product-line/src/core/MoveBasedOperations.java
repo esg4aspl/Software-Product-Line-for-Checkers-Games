@@ -20,7 +20,6 @@ public class MoveBasedOperations {
 		for(int i=1; i<path.size()-1;i++) {
 			if(board.isPlayableCoordinate(path.get(i))) {
 				numberOfPlayableCoordinate++;
-				System.out.println(path.get(i));
 			}
 				
 		}

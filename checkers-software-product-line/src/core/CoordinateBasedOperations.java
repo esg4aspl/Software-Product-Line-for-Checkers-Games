@@ -22,20 +22,35 @@ public class CoordinateBasedOperations {
 		//printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List AAA");
 		List<ICoordinate> path = new ArrayList<>();
 		path.add(sourceCoordinate);
-		while (!(sourceCoordinate.equals(destinationCoordinate))) {
-			for(ICoordinate coordinate: allowedCorrectedDestinationList) {
-				ICoordinate nextPlayableCoordinate = findNextPlayableCoordinate(sourceCoordinate, destinationCoordinate, direction);
-				if(nextPlayableCoordinate.getXCoordinate()==coordinate.getXCoordinate() && nextPlayableCoordinate.getYCoordinate()==
-						coordinate.getYCoordinate()) {
-					path.add(coordinate);
-					sourceCoordinate = coordinate;
-					break;
+		
+		if(!piece.getPieceMoveConstraints().isMultipleSquareMarchMoveAllowed(direction)
+				&& piece.getPieceMoveConstraints().isSingleSquareMarchMoveAllowed(direction)
+				&& !piece.getPieceMoveConstraints().isSingleSquareJumpMoveAllowed(direction)
+				&& !piece.getPieceMoveConstraints().isMultipleSquareJumpMoveAllowed(direction)) {
+			for(ICoordinate c : allowedCorrectedDestinationList) {
+				if(c.equals(destinationCoordinate)) {
+					path.add(destinationCoordinate);
+					return path;
 				}
 			}
 		}
-		//printPathList(path, direction + " Path SONSSSSS");
+		else {
+			while (!(sourceCoordinate.equals(destinationCoordinate))) {
+				for(ICoordinate coordinate: allowedCorrectedDestinationList) {
+					ICoordinate nextPlayableCoordinate = findNextPlayableCoordinate(sourceCoordinate, destinationCoordinate, direction);
+					if(nextPlayableCoordinate.getXCoordinate()==coordinate.getXCoordinate() && nextPlayableCoordinate.getYCoordinate()==
+							coordinate.getYCoordinate()) {
+						path.add(coordinate);
+						sourceCoordinate = coordinate;
+						break;
+					}
+				}
+			}	
+		}
+		
 		return path;
 	}
+
 	
 	private ICoordinate findNextPlayableCoordinate(ICoordinate source, ICoordinate destination, Direction direction) {
 		ICoordinate temp = null;
@@ -163,8 +178,6 @@ public class CoordinateBasedOperations {
 		IPieceMovePossibilities pieceMovePossibilities = piece.getPieceMovePossibilities();
 		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
 		List<ICoordinate> allowedCorrectedDestinationList = findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		//System.out.println("SOURCE: "+sourceCoordinate);
-		//printCoordinateList(allowedCorrectedDestinationList, "Allowed Corrected Destination List");
 		List<ICoordinate> secondJumpList = new ArrayList<>();
 		
 		for(ICoordinate destinationCoordinate : allowedCorrectedDestinationList) {
@@ -193,33 +206,6 @@ public class CoordinateBasedOperations {
 		}
 		return secondJumpList;
 	}
-	/*
-	public List<ICoordinate> findAllowedContiniousJumpListForMultipleSquare(AbstractPiece piece){
-		ICoordinate sourceCoordinate = piece.getCurrentCoordinate();
-		IPieceMovePossibilities pieceMovePossibilities = piece.getPieceMovePossibilities();
-		List<ICoordinate> possibleRelativeDestinationList = pieceMovePossibilities.getPossibleRelativeDestinationList(sourceCoordinate, piece.getGoalDirection());
-		List<ICoordinate> allowedCorrectedDestinationList = findAllowedCorrectedDestinationList(sourceCoordinate, possibleRelativeDestinationList);
-		List<ICoordinate> secondJumpList = new ArrayList<>();
-		for(ICoordinate destinationCoordinate : allowedCorrectedDestinationList) {
-			IMoveCoordinate moveCoordinate = new MoveCoordinate(sourceCoordinate,destinationCoordinate);
-			if(board.getMBO().isJumpMove(piece, moveCoordinate) && 
-					!isPieceBlockedForJump(piece, destinationCoordinate)) {
-				List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
-				int howManyPiecesAreOnPath = 0;
-				for(int i=1; i<path.size()-1;i++) {
-					ICoordinate coordinateOnPath = path.get(i);
-					AbstractPiece pieceAtCoord = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinateOnPath);
-					if(pieceAtCoord!=null) {
-						howManyPiecesAreOnPath++;
-					}
-				}
-				if(howManyPiecesAreOnPath==1) {
-					secondJumpList.add(path.get(path.size()-1));
-				}
-			}
-		}
-		return secondJumpList;
-	}*/
 
 	public boolean isPieceBlockedForJump(AbstractPiece piece, ICoordinate coordinate) {
     	AbstractPiece pieceAtDestination = board.getCoordinatePieceMap().getPieceAtCoordinate(coordinate);
@@ -227,13 +213,7 @@ public class CoordinateBasedOperations {
 		else return false;
 	}
 
-	protected void printCoordinateList(List<ICoordinate> coordinateList, String header) {
-		System.out.println(header);
-		for(ICoordinate coordinate : coordinateList)
-			System.out.println(coordinate);
-	}
-
-	public void printPathList(List<ICoordinate> coordinateList, String header) {
+	public void printCoordinateList(List<ICoordinate> coordinateList, String header) {
 		System.out.println(header);
 		for(ICoordinate coordinate : coordinateList)
 			System.out.println(coordinate);

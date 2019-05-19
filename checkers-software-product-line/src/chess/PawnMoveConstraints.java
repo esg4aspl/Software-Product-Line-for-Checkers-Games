@@ -25,7 +25,7 @@ public class PawnMoveConstraints implements IPieceMoveConstraints {
 		case SE: return false;
 		case NW: return false;
 		case SW: return false;
-		case N: return false;
+		case N: return true;
 		case S: return false;
 		case E: return false;
 		case W: return false;

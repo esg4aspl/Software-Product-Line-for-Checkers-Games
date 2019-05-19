@@ -2,7 +2,7 @@ package chess;
 
 import core.*;
 
-public class ChessGameConfiguration extends AbstractGameConfiguration {
+public class ChessGameConfiguration implements IGameConfiguration {
 
 	public int getNumberOfPlayers() {
 		return 2;
@@ -10,6 +10,11 @@ public class ChessGameConfiguration extends AbstractGameConfiguration {
 	
 	public int getNumberOfPiecesPerPlayer() {
 		return 16;
+	}
+
+	@Override
+	public boolean getAutomaticGameStatus() {
+		return false;
 	}
 
 }

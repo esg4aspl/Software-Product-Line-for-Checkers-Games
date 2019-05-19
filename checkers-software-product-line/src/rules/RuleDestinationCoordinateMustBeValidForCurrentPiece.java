@@ -12,7 +12,7 @@ public class RuleDestinationCoordinateMustBeValidForCurrentPiece implements IRul
 		AbstractBoard board = referee.getBoard();
 		boolean isDestinationValid = board.isDestinationCoordinateValid(piece, moveCoordinate);
 		if (!isDestinationValid) {
-			System.out.println("Destination Valid? " + isDestinationValid);
+			referee.printMessage("Destination Valid? " + isDestinationValid);
 			return false;
 		}
     	return true;

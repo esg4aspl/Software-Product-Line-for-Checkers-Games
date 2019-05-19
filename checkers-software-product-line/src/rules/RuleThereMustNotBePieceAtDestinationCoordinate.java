@@ -10,7 +10,7 @@ public class RuleThereMustNotBePieceAtDestinationCoordinate implements IRule {
     	CoordinatePieceMap coordinatePieceMap = referee.getCoordinatePieceMap();
     	AbstractPiece pieceAtDestination = coordinatePieceMap.getPieceAtCoordinate(destinationCoordinate);
 		if (pieceAtDestination != null) {
-			System.out.println("A piece at destination coordinate");
+			referee.printMessage("A piece at destination coordinate");
 			return false;
 		}
     	return true;

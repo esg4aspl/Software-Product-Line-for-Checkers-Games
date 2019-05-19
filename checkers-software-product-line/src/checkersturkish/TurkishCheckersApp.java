@@ -1,6 +1,5 @@
 package checkersturkish;
 
-import base.*;
 import core.AbstractReferee;
 
 public class TurkishCheckersApp {

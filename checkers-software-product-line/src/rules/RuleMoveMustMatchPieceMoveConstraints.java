@@ -12,7 +12,7 @@ public class RuleMoveMustMatchPieceMoveConstraints implements IRule {
 		AbstractBoard board = referee.getBoard();
 		boolean isMoveLegal = board.isMoveMatchPieceMoveConstraints(piece, moveCoordinate);
 		if (!isMoveLegal) {
-			System.out.println("Move Match Piece Move Constraints? " + isMoveLegal);
+			referee.printMessage("Move Match Piece Move Constraints? " + isMoveLegal);
 			return false;
 		}
 		return true;

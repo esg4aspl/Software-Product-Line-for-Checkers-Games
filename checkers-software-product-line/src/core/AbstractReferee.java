@@ -1,8 +1,9 @@
 package core;
 
+
 public abstract class AbstractReferee {
 	
-	protected AbstractGameConfiguration gameConfiguration;
+	protected IGameConfiguration gameConfiguration;
 	protected int currentPlayerID, numberOfPlayers, numberOfPiecesPerPlayer;
 	protected IPlayerList playerList;
 	protected IPlayer currentPlayer;
@@ -10,9 +11,11 @@ public abstract class AbstractReferee {
 	protected IMoveCoordinate currentMoveCoordinate;
 	protected AbstractBoard board;
 	protected CoordinatePieceMap coordinatePieceMap;
-
-	public AbstractReferee(AbstractGameConfiguration gameConfiguration) {
-		this.gameConfiguration = gameConfiguration;
+	protected IView view;
+	protected boolean automaticGameOn;
+	public AbstractReferee(IGameConfiguration gameConfiguration) {
+		this.gameConfiguration = gameConfiguration;	
+		automaticGameOn = gameConfiguration.getAutomaticGameStatus();
 	}
 
 	// TODO template pattern
@@ -29,7 +32,7 @@ public abstract class AbstractReferee {
 		return playerList;
 	}
 
-	public AbstractGameConfiguration getGameConfiguration() {
+	public IGameConfiguration getGameConfiguration() {
 		return gameConfiguration;
 	}
 
@@ -71,5 +74,9 @@ public abstract class AbstractReferee {
 	
 	public IPlayer getPlayerbyID(int id) {
 		return playerList.getPlayer(id);
+	}
+	
+	public void printMessage(String message) {
+		view.printMessage(message);
 	}
 }

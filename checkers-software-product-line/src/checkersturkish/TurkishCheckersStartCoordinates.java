@@ -3,10 +3,10 @@ package checkersturkish;
 import base.StartCoordinates;
 import core.Coordinate;
 
-public class TurkishStartCoordinates extends StartCoordinates{
+public class TurkishCheckersStartCoordinates extends StartCoordinates{
 	
 	
-	public TurkishStartCoordinates() {
+	public TurkishCheckersStartCoordinates() {
 		init();
 		super.numberOfPieces = 16;
 	}

@@ -11,7 +11,7 @@ public class RulePieceAtSourceCoordinateMustBelongToCurrentPlayer implements IRu
     	CoordinatePieceMap coordinatePieceMap = referee.getCoordinatePieceMap();
     	AbstractPiece piece = coordinatePieceMap.getPieceAtCoordinate(sourceCoordinate);
 		if (!piece.getPlayer().equals(player)) {
-			System.out.println("Piece does not belong to current player");
+			referee.printMessage("Piece does not belong to current player");
 			return false;
 		}
     	return true;

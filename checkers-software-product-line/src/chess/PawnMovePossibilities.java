@@ -15,11 +15,15 @@ public class PawnMovePossibilities implements IPieceMovePossibilities {
 			possibleDestinationList.add(new Coordinate(0,1));
 			possibleDestinationList.add(new Coordinate(1,1));
 			possibleDestinationList.add(new Coordinate(-1,1));
+			possibleDestinationList.add(new Coordinate(0,2));
+
 		}
 		else {
 			possibleDestinationList.add(new Coordinate(0,-1));
 			possibleDestinationList.add(new Coordinate(-1,-1));
 			possibleDestinationList.add(new Coordinate(1,-1));
+			possibleDestinationList.add(new Coordinate(0,-2));
+
 		}
 
 		return possibleDestinationList;

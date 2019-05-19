@@ -15,7 +15,7 @@ public class MoveFileReader {
 	private Scanner sc;
 
 	public MoveFileReader() {
-		filename = "completeGameForTurkish";
+		filename = "chessMat";
 	    file = new File(filename); 
 	  	try {
 			sc = new Scanner(file);
@@ -29,7 +29,7 @@ public class MoveFileReader {
 		String line;
 		while (sc.hasNextLine()) {
 			line = sc.nextLine();
-			System.out.println(line);
+			//System.out.println(line);
 			IPlayer player = referee.getPlayerbyID(Integer.parseInt(line.substring(0, 1)));
 			IMoveCoordinate moveCoordinate = new MoveCoordinate(
 					new Coordinate(Integer.parseInt(line.substring(3, 4)),

@@ -34,7 +34,6 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 		List<AbstractPiece> otherPlayerPieces = otherPlayer.getPieceList();
 		for(AbstractPiece piece : otherPlayerPieces) {
 			//check is there any jump move
-			//System.out.println(piece+" BLOCKEDDDD!!!");
 			ICoordinate sourceCoordinateOfCurrentPiece = piece.getCurrentCoordinate();
 			CoordinateBasedOperations cbo = board.getCBO();
 			IPieceMovePossibilities piecePossibilities = piece.getPieceMovePossibilities();
@@ -44,7 +43,6 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 				IMoveCoordinate possibleMoveCoordinate = new MoveCoordinate(sourceCoordinateOfCurrentPiece,possibleDestinationCoordinate);
 				//if possible move is jump move then consider correct jump control also
 				if(board.getMBO().isJumpMove(piece, possibleMoveCoordinate)) {
-					//System.out.println(piece+" - "+possibleMoveCoordinate+" ***********");
 					if(isDestinationCoodinateValidAndNull(possibleMoveCoordinate, referee, piece, board) && 
 							isJumpedPieceExistsAndBelongsToOpponent(referee, possibleMoveCoordinate, currentPlayer, piece, cbo)) {
 						return false;
@@ -55,7 +53,7 @@ public class RuleEndOfGameWhenOpponentBlocked implements IRule {
 				}
 			}
 		}
-		System.out.println("OPPONENT'S MOVE IS BLOCKED!!!!!!");
+		referee.printMessage("OPPONENT'S MOVE IS BLOCKED!!!!!!");
 		return true;
 		
 	}
