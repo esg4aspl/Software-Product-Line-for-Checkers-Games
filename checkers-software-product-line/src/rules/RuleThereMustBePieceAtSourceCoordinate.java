@@ -11,7 +11,7 @@ public class RuleThereMustBePieceAtSourceCoordinate implements IRule {
 		AbstractPiece piece = coordinatePieceMap.getPieceAtCoordinate(sourceCoordinate);
 		if (piece == null) {
 			// TODO improve with notification pattern
-			System.out.println("No piece at source coordinate");
+			referee.printMessage("No piece at source coordinate");
 			return false;
 		}
     	return true;

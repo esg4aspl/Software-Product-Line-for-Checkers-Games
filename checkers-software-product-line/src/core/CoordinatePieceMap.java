@@ -22,7 +22,11 @@ public class CoordinatePieceMap {
 	}
 
 	public AbstractPiece getPieceAtCoordinate(ICoordinate coordinate) {
-		return map[coordinate.getXCoordinate()][coordinate.getYCoordinate()];
+		try {
+			return map[coordinate.getXCoordinate()][coordinate.getYCoordinate()];
+		}catch(ArrayIndexOutOfBoundsException e) {
+			return null;
+		}		
 	}
 
 	public void capturePieceAtCoordinate(AbstractPiece piece, ICoordinate coordinate) {

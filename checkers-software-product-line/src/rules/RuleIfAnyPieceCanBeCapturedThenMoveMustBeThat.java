@@ -53,22 +53,13 @@ public class RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat implements IRule {
 				return true;
 			}
 			else {
-				System.out.println("If any opponent's pieces can be captured then it must be captured first!!!!");
-				printListTest(possibleCapturedMoves);
+				referee.printMessage("If any opponent's pieces can be captured then it must be captured first!!!!");
+				
 				return false;
 			}
 			
 		}
 		return true;
-	}
-	//captured list
-	//this part is just for test
-	private void printListTest(List<IMoveCoordinate> list) {
-		System.out.println("FIRST YOU SHOULD MOVE : ");
-		for(IMoveCoordinate m : list) {
-			System.out.println(m.getSourceCoordinate()+" - "+m.getDestinationCoordinate());
-		}
-		System.out.println("--------------------------");
 	}
 
 }

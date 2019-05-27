@@ -10,15 +10,14 @@ import base.*;
 import rules.*;
 
 public class Referee extends AbstractReferee {
-
 	protected ChineseCheckersBoardConsoleView consoleView;
-	protected boolean automaticGameOn;
 	private String[] icons; 
 	private Direction[] directions;
+	IView view;
 
-	public Referee(AbstractGameConfiguration checkersGameConfiguration) {
+	public Referee(IGameConfiguration checkersGameConfiguration) {
 		super(checkersGameConfiguration);
-		automaticGameOn = true;
+
 	}
 		
 	public void setup() {
@@ -50,6 +49,7 @@ public class Referee extends AbstractReferee {
 		board = new ChineseCheckersBoard();
 		coordinatePieceMap = board.getCoordinatePieceMap();
 		consoleView = new ChineseCheckersBoardConsoleView(this);
+		view = new ChineseCheckersBoardConsoleView(this);
 	}
 
 	private void setupPiecesOnBoard() {
@@ -68,7 +68,7 @@ public class Referee extends AbstractReferee {
 			String icon;
 			Direction direction;
 			icon = icons[i];
-			System.out.println("Player "+i+" "+icon);
+			view.printMessage("Player "+i+" "+icon);
 			direction = directions[i];
 			for (int j = 0; j < numberOfPiecesPerPlayer; j++) {
 				men = new ChinesePawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
@@ -77,8 +77,8 @@ public class Referee extends AbstractReferee {
 			}
 		}
 		
-	    coordinatePieceMap.printPieceMap();
-		System.out.println(playerList.getPlayerStatus());
+	    //coordinatePieceMap.printPieceMap();
+
 	}
 	
 	private Direction[] createDirections(int numberOfPlayers) {
@@ -95,16 +95,14 @@ public class Referee extends AbstractReferee {
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean startWithAutomaticGame = true;
-		IRule endRule = new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates();
-		if (startWithAutomaticGame) {
+		if (automaticGameOn) {
 			conductAutomaticGame();
-			endOfGame = (isSatisfied(endRule, this));
-			System.out.println("End Of Game? " + endOfGame);
+			endOfGame = (isSatisfied(new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates(), this));
+			view.printMessage("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
-			System.out.println(playerList.getPlayerStatus());
-			System.out.println("Game begins ...");
+			view.printMessage(playerList.getPlayerStatus());
+			view.printMessage("Game begins ...");
 			consoleView.drawBoardView();
 		}
 		while (!endOfGame) {
@@ -116,7 +114,7 @@ public class Referee extends AbstractReferee {
 
 			endOfGame = (isSatisfied(endRule, this));
 			
-			System.out.println("End Of Game? " + endOfGame);
+			view.printMessage("End Of Game? " + endOfGame);
 			if (endOfGame) break;
 			
 			currentPlayerID++;
@@ -125,14 +123,14 @@ public class Referee extends AbstractReferee {
 		} 
 		//consoleView.drawBoardView();
 		
-		System.out.println("WINNER " + announceWinner());
+		view.printMessage("WINNER " + announceWinner());
 		
 		consoleView.closeFile();
 		System.exit(0);
 	}
 
 	private void conductAutomaticGame() {				
-		System.out.println("Automatic Game begins ...");
+		view.printMessage("Automatic Game begins ...");
 		automaticGameOn = true;
 		int step = 0;
 		consoleView.drawBoardView();
@@ -146,7 +144,7 @@ public class Referee extends AbstractReferee {
 			step++;
 		}
 		automaticGameOn = false;
-		System.out.println("Automatic Game ends ...");
+		view.printMessage("Automatic Game ends ...");
 	}
 	
 	protected boolean conductMove() {
@@ -154,13 +152,13 @@ public class Referee extends AbstractReferee {
 		ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
 		AbstractPiece piece = coordinatePieceMap.getPieceAtCoordinate(sourceCoordinate);
 		if (!checkMove()) return false;
-		System.out.println(currentMoveCoordinate+" current move corrd");
+		view.printMessage(currentMoveCoordinate+" current move corrd");
 		List<ICoordinate> path = board.getCBO().findPath(piece, currentMoveCoordinate);
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 		
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
+		view.printMessage("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 			conductCurrentPlayerTurnAgain(moveOpResult, piece);
 		return true;
@@ -186,7 +184,7 @@ public class Referee extends AbstractReferee {
 				break;
 			}
 
-			board.getCBO().printPathList(secondJumpList, "Second Jump List");
+			board.getCBO().printCoordinateList(secondJumpList, "Second Jump List");
 			currentMoveCoordinate = consoleView.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
 			ICoordinate sourceCoordinate = currentMoveCoordinate.getSourceCoordinate();
 			ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
@@ -225,9 +223,7 @@ public class Referee extends AbstractReferee {
 	protected MoveOpResult moveInterimOperation(AbstractPiece piece, IMoveCoordinate moveCoordinate, List<ICoordinate> path) {
 		//IPlayer player = piece.getPlayer();
 		if (board.getMBO().isJumpMove(piece, moveCoordinate)) {
-			System.out.println("Jump Move");
 			ICoordinate pathCoordinate = path.get(1);
-			System.out.println("Path Coordinate " + pathCoordinate);
 			AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
 			if (pieceAtPath != null) {
 				return new MoveOpResult(true, true); // jumped over piece

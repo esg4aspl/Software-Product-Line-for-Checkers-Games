@@ -15,7 +15,6 @@ public class RuleIfJumpMoveThenJumpedPieceMustBeOpponentPiece implements IRule {
 		AbstractBoard board = referee.getBoard();
 		if (board.getMBO().isJumpMove(piece, moveCoordinate)) {
 			List<ICoordinate> path = board.getCBO().findPath(piece, moveCoordinate);
-			System.out.println("Jump Move");
 
 			int howManyPieceAreOnPath = 0;
 			ICoordinate pathCoordinate = null;
@@ -35,21 +34,20 @@ public class RuleIfJumpMoveThenJumpedPieceMustBeOpponentPiece implements IRule {
 				if(moveConstraints.isMultipleSquareMarchMoveAllowed(moveDirection))
 					return true;
 				else {
-					System.out.println("There must be one piece on jump path " + howManyPieceAreOnPath);
+					referee.printMessage("There must be one piece on jump path " + howManyPieceAreOnPath);
 					return false;
 				}
 					
 			}
 						
 			if(howManyPieceAreOnPath!=1) {
-				System.out.println("There must be only one piece on jump path " + howManyPieceAreOnPath);
+				referee.printMessage("There must be only one piece on jump path " + howManyPieceAreOnPath);
 				return false;
 			}
 				
-			System.out.println("Path Coordinate " + pathCoordinate);
 			AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
 			if (pieceAtPath==null || pieceAtPath.getPlayer().equals(player)) {
-				System.out.println("Jumped Piece Must Be Opponent Piece");
+				referee.printMessage("Jumped Piece Must Be Opponent Piece");
 				return false;
 			}
 		}

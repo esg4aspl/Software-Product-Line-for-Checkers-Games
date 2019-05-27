@@ -56,7 +56,6 @@ public class MoveFileReader {
 							Integer.parseInt(line.substring(5, 6))), 
 					new Coordinate(Integer.parseInt(line.substring(10, 11)),
 							Integer.parseInt(line.substring(12, 13))));
-
 			AbstractMove move = new Move(player, moveCoordinate);
 			automaticMoveList.add(move);
 			*/

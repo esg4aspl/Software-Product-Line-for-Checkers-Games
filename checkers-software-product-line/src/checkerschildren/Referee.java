@@ -9,13 +9,10 @@ import checkersamerican.AmericanStartCoordinates;
 import rules.*;
 
 public class Referee extends AbstractReferee {
-
 	protected AmericanCheckersBoardConsoleView consoleView;
-	protected boolean automaticGameOn;
 
-	public Referee(AbstractGameConfiguration gameConfiguration) {
+	public Referee(IGameConfiguration gameConfiguration) {
 		super(gameConfiguration);
-		automaticGameOn = false;
 	}
 		
 	public void setup() {
@@ -75,8 +72,8 @@ public class Referee extends AbstractReferee {
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
-		boolean startWithAutomaticGame = true;
-		if (startWithAutomaticGame) {
+
+		if (automaticGameOn) {
 			conductAutomaticGame();
 			endOfGame = isSatisfied(new RuleEndOfGameChildren(), this);
 			System.out.println("End Of Game? " + endOfGame);
@@ -141,7 +138,7 @@ public class Referee extends AbstractReferee {
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
 			List<ICoordinate> secondJumpList = board.getCBO().findAllowedContinousJumpList(piece);
-			board.getCBO().printPathList(secondJumpList, "Second Jump List");
+			board.getCBO().printCoordinateList(secondJumpList, "Second Jump List");
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;

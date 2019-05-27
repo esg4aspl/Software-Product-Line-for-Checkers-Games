@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import core.*;
 import utils.*;
 
-public class ChineseCheckersBoardConsoleView {
+public class ChineseCheckersBoardConsoleView implements IView{
 
 	protected AbstractReferee referee;
 	protected AbstractBoard checkersBoard;
@@ -203,6 +203,12 @@ public class ChineseCheckersBoardConsoleView {
 
 	public void closeFile() {
 		moveFileWriter.closeFile();
+	}
+
+	@Override
+	public void printMessage(String message) {
+		System.out.println(message);
+		
 	}
 }
 

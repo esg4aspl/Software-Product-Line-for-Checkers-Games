@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import base.AmericanCheckersBoardConsoleView;
+import base.GUI;
 import base.Pawn;
 import base.Player;
 import base.PlayerList;
 import checkersamerican.King;
-import core.AbstractGameConfiguration;
+import core.IGameConfiguration;
 import core.AbstractPiece;
 import core.AbstractReferee;
 import core.Direction;
@@ -26,7 +27,6 @@ import rules.RuleDestinationCoordinateMustBeValidForCurrentPiece;
 import rules.RuleDrawIfNoPromoteForFortyTurn;
 import rules.RuleEndOfGameGeneral;
 import rules.RuleEndOfGameIfEachPlayerHasOnePiece;
-import rules.RuleEndOfGameNoPieceCapturedForFortyTurn;
 import rules.RuleEndOfGameWhenOpponentBlocked;
 import rules.RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat;
 import rules.RuleIfJumpMoveThenJumpedPieceMustBeOpponentPiece;
@@ -37,11 +37,9 @@ import rules.RuleThereMustNotBePieceAtDestinationCoordinate;
 
 public class TurkishReferee extends AbstractReferee{
 	protected AmericanCheckersBoardConsoleView consoleView;
-	protected boolean automaticGameOn;
-
-	public TurkishReferee(AbstractGameConfiguration gameConfiguration) {
+	public TurkishReferee(IGameConfiguration gameConfiguration) {
 		super(gameConfiguration);
-		automaticGameOn=true;
+		view = new GUI("Turkish Checkers", this);
 	}
 
 	@Override
@@ -74,7 +72,7 @@ public class TurkishReferee extends AbstractReferee{
 		// create pieces for players and put them on board
 		IPlayer player;
 		AbstractPiece men;
-		TurkishStartCoordinates startCoordinates = new TurkishStartCoordinates();
+		TurkishCheckersStartCoordinates startCoordinates = new TurkishCheckersStartCoordinates();
 		IPieceMovePossibilities menMovePossibilities = new TurkishPawnPossibilities();
 		IPieceMoveConstraints menMoveConstraints =  new TurkishPawnConstraints();
 
@@ -91,38 +89,35 @@ public class TurkishReferee extends AbstractReferee{
 				direction = Direction.S;
 			}
 			for (int j = 0; j < numberOfPiecesPerPlayer; j++) {
-				men = new Pawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
+				men = new Pawn(1000+i, icon, player, direction, menMovePossibilities, menMoveConstraints);
 				player.addPiece(men);
 				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 			}
 		}
-		// coordinatePieceMap.printPieceMap();
-		System.out.println(playerList.getPlayerStatus());
+	    //coordinatePieceMap.printPieceMap();
+	    view.printMessage(playerList.getPlayerStatus());
 	}
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean endOfGameDraw = false;
-		boolean startWithAutomaticGame = true;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
-		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
 
-		if (startWithAutomaticGame) {
+		if (automaticGameOn) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
 			endOfGameDraw = (isSatisfied(noPromoteRule, this)  || 
 					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
-			System.out.println("End Of Game? " + endOfGame);
+			view.printMessage("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
-			System.out.println(playerList.getPlayerStatus());
-			System.out.println("Game begins ...");
+			view.printMessage("Game begins ...");
 			consoleView.drawBoardView();
 		}
 		while (!endOfGame) {
-			currentMoveCoordinate = consoleView.getNextMove(currentPlayer);
+			currentMoveCoordinate = view.getNextMove(currentPlayer);
 			while (!conductMove()) {
-				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
+				currentMoveCoordinate = view.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
 
@@ -130,7 +125,7 @@ public class TurkishReferee extends AbstractReferee{
 			endOfGameDraw = (isSatisfied(noPromoteRule, this)  || 
 					isSatisfied(new RuleEndOfGameIfEachPlayerHasOnePiece(), this));
 			
-			System.out.println("End Of Game? " + endOfGame);
+			view.printMessage("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
 			
 			currentPlayerID++;
@@ -140,20 +135,31 @@ public class TurkishReferee extends AbstractReferee{
 		//consoleView.drawBoardView();
 		
 		if(endOfGameDraw)
-			System.out.println("DRAW\n" + announceDraw());
+			view.printMessage("DRAW\n" + announceDraw());
 		else
-			System.out.println("WINNER " + announceWinner());
-		
+			view.printMessage("WINNER " + announceWinner());
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		consoleView.closeFile();
 		System.exit(0);
 	}
 	
 	private void conductAutomaticGame() {				
-		System.out.println("Automatic Game begins ...");
+		view.printMessage("Automatic Game begins ...");
 		automaticGameOn = true;
 		int step = 0;
 		consoleView.drawBoardView();
 		while (step < consoleView.getSizeOfAutomaticMoveList()) {
+			try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			currentMove = consoleView.getNextAutomaticMove(step);
 			currentMoveCoordinate = currentMove.getMoveCoordinate();
 			currentPlayer = currentMove.getPlayer();
@@ -163,7 +169,7 @@ public class TurkishReferee extends AbstractReferee{
 			step++;
 		}
 		automaticGameOn = false;
-		System.out.println("Automatic Game ends ...");
+		view.printMessage("Automatic Game ends ...");
 	}
 	
 	protected boolean checkMove() {
@@ -196,7 +202,7 @@ public class TurkishReferee extends AbstractReferee{
 		
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
+		view.printMessage("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 			conductCurrentPlayerTurnAgain(moveOpResult, piece);
 		return true;
@@ -205,9 +211,7 @@ public class TurkishReferee extends AbstractReferee{
 	protected MoveOpResult moveInterimOperation(AbstractPiece piece, IMoveCoordinate moveCoordinate, List<ICoordinate> path) {
 		IPlayer player = piece.getPlayer();
 		if (board.getMBO().isJumpMove(piece, moveCoordinate) && piecesOnPath(path).size()==1) {
-			System.out.println("Jump Move");
 			ICoordinate pathCoordinate = piecesOnPath(path).get(0);
-			System.out.println("Path Coordinate " + pathCoordinate);
 			AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
 			if (!pieceAtPath.getPlayer().equals(player)) {
 				// capture piece at path
@@ -228,7 +232,7 @@ public class TurkishReferee extends AbstractReferee{
 		String icon;
 		if (player.getId() == 0) icon = "A";
 		else icon = "Z";
-		AbstractPiece king = new King(pieceID, icon, player, goalDirection, kingMovePossibilities, kingMoveConstraints);
+		AbstractPiece king = new King(pieceID+2, icon, player, goalDirection, kingMovePossibilities, kingMoveConstraints);
 		player.addPiece(king);
 		return king;
 	}
@@ -250,27 +254,44 @@ public class TurkishReferee extends AbstractReferee{
 	
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
 		//AbstractPiece temp  = piece;
+		boolean flag = false;		
+		IMoveCoordinate rollbackTemp;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
+			flag = false;
 			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();		
 			List<ICoordinate> jumpList = findAllowedJumpListWithOpponentPieceOnPath(piece);
-			
+			rollbackTemp = currentMoveCoordinate;
 			Direction lastMoveDirection = board.getCBO().findDirection(currentMoveCoordinate.getSourceCoordinate(),currentMoveCoordinate.getDestinationCoordinate());
 			
 			for(ICoordinate destinationCoordinate : jumpList) {
 				Direction newDirection = board.getCBO().findDirection(currentMoveCoordinate.getDestinationCoordinate(), destinationCoordinate);
-				if(!lastMoveDirection.getOppositeDirection().equals(newDirection) )
+				if(lastMoveDirection.getOppositeDirection()!=newDirection ) {				
 					secondJumpList.add(destinationCoordinate);	
+				}
 			}
 			
 			if (secondJumpList.size() == 0) {
 				moveOpResult = new MoveOpResult(false, false);
 				break;
 			}
-			board.getCBO().printPathList(secondJumpList, "Second Jump List");
-			currentMoveCoordinate = consoleView.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
+			board.getCBO().printCoordinateList(secondJumpList, "Second Jump List");
+			currentMoveCoordinate = view.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
 			ICoordinate sourceCoordinate = currentMoveCoordinate.getSourceCoordinate();
 			ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
-			if (!checkMove()) continue;
+			
+			for(ICoordinate coord : secondJumpList) {
+				if(coord.equals(destinationCoordinate))
+					flag=true;
+			}
+			if(!flag) {
+				currentMoveCoordinate = rollbackTemp;
+				continue;
+			}
+			
+			if (!checkMove()) { 
+				currentMoveCoordinate = rollbackTemp;
+				continue;
+			}
 			moveOpResult = new MoveOpResult(false, false);
 			for(ICoordinate coordinate : secondJumpList) {
 				if (coordinate.equals(destinationCoordinate)) {

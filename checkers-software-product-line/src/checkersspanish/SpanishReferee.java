@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import base.AmericanCheckersBoardConsoleView;
+import base.GUI;
 import base.Pawn;
 import base.PawnMoveConstraints;
 import base.PawnMovePossibilities;
 import base.Player;
 import base.PlayerList;
-import core.AbstractGameConfiguration;
+import core.IGameConfiguration;
 import core.AbstractPiece;
 import core.AbstractReferee;
 import core.Direction;
@@ -26,7 +27,6 @@ import core.MoveOpResult;
 import rules.RuleDestinationCoordinateMustBeValidForCurrentPiece;
 import rules.RuleDrawIfNoPromoteForFortyTurn;
 import rules.RuleEndOfGameGeneral;
-import rules.RuleEndOfGameNoPieceCapturedForFortyTurn;
 import rules.RuleEndOfGameWhenOpponentBlocked;
 import rules.RuleIfAnyPieceCanBeCapturedThenMoveMustBeThat;
 import rules.RuleIfJumpMoveThenJumpedPieceMustBeOpponentPiece;
@@ -37,12 +37,9 @@ import rules.RuleThereMustNotBePieceAtDestinationCoordinate;
 
 public class SpanishReferee extends AbstractReferee{
 	protected AmericanCheckersBoardConsoleView consoleView;
-	protected boolean automaticGameOn;
-
-	public SpanishReferee(AbstractGameConfiguration gameConfiguration) {
+	public SpanishReferee(IGameConfiguration gameConfiguration) {
 		super(gameConfiguration);
-		// TODO Auto-generated constructor stub
-		automaticGameOn=false;
+		view = new GUI("Spanish Checkers", this);
 	}
 
 	@Override
@@ -93,63 +90,59 @@ public class SpanishReferee extends AbstractReferee{
 				direction = Direction.S;
 			}
 			for (int j = 0; j < numberOfPiecesPerPlayer; j++) {
-				men = new Pawn(j, icon, player, direction, menMovePossibilities, menMoveConstraints);
+				men = new Pawn(1000+i, icon, player, direction, menMovePossibilities, menMoveConstraints);
 				player.addPiece(men);
 				coordinatePieceMap.putPieceToCoordinate(men, startCoordinates.getNextCoordinate());
 			}
 		}
-		// coordinatePieceMap.printPieceMap();
-		System.out.println(playerList.getPlayerStatus());
+		 //coordinatePieceMap.printPieceMap();
+		view.printMessage(playerList.getPlayerStatus());
 	}
 	
 	public void conductGame() {		
 		boolean endOfGame = false;
 		boolean endOfGameDraw = false;
-		boolean startWithAutomaticGame = false;
 		IRule noPromoteRule = new RuleDrawIfNoPromoteForFortyTurn();
-		IRule noPieceCapturedForFortyTurn = new RuleEndOfGameNoPieceCapturedForFortyTurn();
-
-		if (startWithAutomaticGame) {
+		if (automaticGameOn) {
 			conductAutomaticGame();
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
 			endOfGameDraw = (isSatisfied(noPromoteRule, this));
-			System.out.println("End Of Game? " + endOfGame);
+			view.printMessage("End Of Game? " + endOfGame);
 		}
 		if(!endOfGame) {
-			System.out.println(playerList.getPlayerStatus());
-			System.out.println("Game begins ...");
+			view.printMessage("Game begins ...");
 			consoleView.drawBoardView();
 		}
 		while (!endOfGame) {
-			currentMoveCoordinate = consoleView.getNextMove(currentPlayer);
+			currentMoveCoordinate = view.getNextMove(currentPlayer);
 			while (!conductMove()) {
-				currentMoveCoordinate = consoleView.getNextMove(currentPlayer);				
+				currentMoveCoordinate = view.getNextMove(currentPlayer);				
 			}
 			consoleView.drawBoardView();
 
 			endOfGame = (isSatisfied(new RuleEndOfGameGeneral(), this) || isSatisfied(new RuleEndOfGameWhenOpponentBlocked(), this));
 			endOfGameDraw = (isSatisfied(noPromoteRule, this) );
 			
-			System.out.println("End Of Game? " + endOfGame);
+			view.printMessage("End Of Game? " + endOfGame);
 			if (endOfGame || endOfGameDraw) break;
 			
 			currentPlayerID++;
 			if (currentPlayerID >= numberOfPlayers) currentPlayerID = 0;
 			currentPlayer = getPlayerbyID(currentPlayerID);
 		} 
-		//consoleView.drawBoardView();
+		consoleView.drawBoardView();
 		
 		if(endOfGameDraw)
-			System.out.println("DRAW\n" + announceDraw());
+			view.printMessage("DRAW\n" + announceDraw());
 		else
-			System.out.println("WINNER " + announceWinner());
+			view.printMessage("WINNER " + announceWinner());
 		
 		consoleView.closeFile();
 		System.exit(0);
 	}
 	
 	private void conductAutomaticGame() {				
-		System.out.println("Automatic Game begins ...");
+		view.printMessage("Automatic Game begins ...");
 		automaticGameOn = true;
 		int step = 0;
 		consoleView.drawBoardView();
@@ -163,7 +156,7 @@ public class SpanishReferee extends AbstractReferee{
 			step++;
 		}
 		automaticGameOn = false;
-		System.out.println("Automatic Game ends ...");
+		view.printMessage("Automatic Game ends ...");
 	}
 	
 	protected boolean checkMove() {
@@ -195,7 +188,7 @@ public class SpanishReferee extends AbstractReferee{
 		coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 		MoveOpResult moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 		piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-		System.out.println("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
+		view.printMessage("CurrentPlayerTurnAgain? " + moveOpResult.isCurrentPlayerTurnAgain());
 		if (moveOpResult.isCurrentPlayerTurnAgain() && !automaticGameOn) 
 			conductCurrentPlayerTurnAgain(moveOpResult, piece);
 		return true;
@@ -204,7 +197,6 @@ public class SpanishReferee extends AbstractReferee{
 	protected MoveOpResult moveInterimOperation(AbstractPiece piece, IMoveCoordinate moveCoordinate, List<ICoordinate> path) {
 		IPlayer player = piece.getPlayer();
 		if (board.getMBO().isJumpMove(piece, moveCoordinate) && piecesOnPath(path).size()==1) {
-			System.out.println("Jump Move");
 			ICoordinate pathCoordinate = piecesOnPath(path).get(0);
 			AbstractPiece pieceAtPath = coordinatePieceMap.getPieceAtCoordinate(pathCoordinate);
 			if (!pieceAtPath.getPlayer().equals(player)) {
@@ -221,12 +213,12 @@ public class SpanishReferee extends AbstractReferee{
 		int pieceID = piece.getId();
 		Direction goalDirection = piece.getGoalDirection();
 		player.removePiece(piece);
-		IPieceMovePossibilities kingMovePossibilities = new QueenMovePossibilities();
-		IPieceMoveConstraints kingMoveConstraints =  new QueenMoveConstraints();
+		IPieceMovePossibilities queenMovePossibilities = new QueenMovePossibilities();
+		IPieceMoveConstraints queenMoveConstraints =  new QueenMoveConstraints();
 		String icon;
 		if (player.getId() == 0) icon = "A";
 		else icon = "Z";
-		AbstractPiece king = new Queen(pieceID, icon, player, goalDirection, kingMovePossibilities, kingMoveConstraints);
+		AbstractPiece king = new Queen(pieceID+2, icon, player, goalDirection, queenMovePossibilities, queenMoveConstraints);
 		player.addPiece(king);
 		return king;
 	}
@@ -234,10 +226,12 @@ public class SpanishReferee extends AbstractReferee{
 	
 	protected boolean conductCurrentPlayerTurnAgain(MoveOpResult moveOpResult, AbstractPiece piece) {
 		AbstractPiece temp  = piece;
+		boolean flag = false;		
+		IMoveCoordinate rollbackTemp;
 		while (moveOpResult.isCurrentPlayerTurnAgain()) {
 			List<ICoordinate> jumpList = board.getCBO().findAllowedContinousJumpList(piece);
 			List<ICoordinate> secondJumpList = new ArrayList<ICoordinate>();
-			
+			rollbackTemp = currentMoveCoordinate;
 			Direction lastMoveDirection = board.getCBO().findDirection(currentMoveCoordinate.getSourceCoordinate(),currentMoveCoordinate.getDestinationCoordinate());
 			
 			for(ICoordinate destinationCoordinate : jumpList) {
@@ -252,11 +246,27 @@ public class SpanishReferee extends AbstractReferee{
 				moveOpResult = new MoveOpResult(false, false);
 				break;
 			}
-			board.getCBO().printPathList(secondJumpList, "Second Jump List");
-			currentMoveCoordinate = consoleView.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
+			board.getCBO().printCoordinateList(secondJumpList, "Second Jump List");
+			currentMoveCoordinate = view.getNextMove(currentPlayer, currentMoveCoordinate.getDestinationCoordinate());
 			ICoordinate sourceCoordinate = currentMoveCoordinate.getSourceCoordinate();
 			ICoordinate destinationCoordinate = currentMoveCoordinate.getDestinationCoordinate();
-			if (!checkMove()) continue;
+			
+			
+			for(ICoordinate coord : secondJumpList) {
+				if(coord.equals(destinationCoordinate))
+					flag=true;
+			}
+			if(!flag) {
+				currentMoveCoordinate = rollbackTemp;
+				continue;
+			}
+			
+			if (!checkMove()) { 
+				currentMoveCoordinate = rollbackTemp;
+				continue;
+			}
+			
+			
 			moveOpResult = new MoveOpResult(false, false);
 			for(ICoordinate coordinate : secondJumpList) {
 				if (coordinate.equals(destinationCoordinate)) {
@@ -264,8 +274,10 @@ public class SpanishReferee extends AbstractReferee{
 					coordinatePieceMap.removePieceFromCoordinate(piece, sourceCoordinate);
 					moveOpResult = moveInterimOperation(piece, currentMoveCoordinate, path);
 					piece = becomeAndOrPutOperation(piece, destinationCoordinate);
-					if(!temp.equals(piece)) 
+					if(!temp.equals(piece)) {
 						moveOpResult = new MoveOpResult(true, false);
+					}
+						
 				}
 			}
 		}
@@ -290,8 +302,8 @@ public class SpanishReferee extends AbstractReferee{
 	protected AbstractPiece becomeAndOrPutOperation(AbstractPiece piece, ICoordinate destinationCoordinate) {
 		//check the piece is already queen or not
 		if(!(piece instanceof Queen))
-			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7 && piece.getIcon().equals("B"))
-					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0 && piece.getIcon().equals("W"))){
+			if ((piece.getGoalDirection() == Direction.N && destinationCoordinate.getYCoordinate() == 7)
+					|| (piece.getGoalDirection() == Direction.S && destinationCoordinate.getYCoordinate() == 0)){
 				IPlayer player = piece.getPlayer();
 				piece = becomeNewPiece(player, piece);
 			}
