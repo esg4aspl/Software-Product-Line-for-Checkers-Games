@@ -177,7 +177,7 @@ public class ChineseCheckersBoardConsoleView implements IView{
 			moveCoordinate = new MoveCoordinate(sourceCoordinate, destinationCoordinate);		
 			AbstractMove move = new Move(currentPlayer, moveCoordinate);
 			
-			if (scx==9 && scy==9 && dcx==9 && dcy==9) {
+			if (scx==999 && scy==999 && dcx==999 && dcy==999) {
 				moveFileWriter.closeFile();
 				System.exit(0);
 			}

@@ -5,7 +5,7 @@ import core.*;
 public class ChineseGameConfiguration implements IGameConfiguration {
 
 	public int getNumberOfPlayers() {
-		return 3;
+		return 2;
 	}
 	
 	public int getNumberOfPiecesPerPlayer() {
