@@ -233,7 +233,7 @@ public class Referee extends AbstractReferee {
 	}
 
 	protected boolean checkMove() {
-		return isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
+		return     isSatisfied(new RuleThereMustBePieceAtSourceCoordinate(), this)
 				&& isSatisfied(new RulePieceAtSourceCoordinateMustBelongToCurrentPlayer(), this)
 				&& isSatisfied(new RuleDestinationCoordinateMustBeValidForCurrentPiece(), this)
 				&& isSatisfied(new RuleMoveMustMatchPieceMoveConstraints(), this)

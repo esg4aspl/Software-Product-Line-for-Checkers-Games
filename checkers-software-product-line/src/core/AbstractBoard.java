@@ -2,9 +2,11 @@ package core;
 
 import java.util.List;
 
+import graphComponents.MatrixBoard;
+
 public abstract class AbstractBoard {
 	
-	protected int[][] boardMatrix;
+	protected MatrixBoard boardMatrix;
 	protected int maxOfDimensionX, maxOfDimensionY;
 	protected CoordinatePieceMap coordinatePieceMap;
 	
@@ -72,7 +74,7 @@ public abstract class AbstractBoard {
 	public boolean isPlayableCoordinate(ICoordinate coordinate) {
 		int coordinateX = coordinate.getXCoordinate();
 		int coordinateY = coordinate.getYCoordinate();
-		if(boardMatrix[coordinateY][coordinateX]==1)
+		if((int)boardMatrix.getPlace(coordinateX, coordinateY)==1)
 			return true;
 		else
 			return false;

@@ -155,7 +155,7 @@ public class CoordinateBasedOperations {
 		int y = coordinate.getYCoordinate();
 		if ((x >= 0 && x <= board.maxOfDimensionX) && (y >= 0 && y <= board.maxOfDimensionY))
 			// second check if cell is 1
-			if (board.boardMatrix[y][x] == 1) return true;
+			if ((int)board.boardMatrix.getPlace(x, y) == 1) return true;
 			
 			
 		return false;

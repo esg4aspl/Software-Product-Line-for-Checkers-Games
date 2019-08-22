@@ -1,6 +1,7 @@
 package checkersturkish;
 
 import core.AbstractBoard;
+import graphComponents.MatrixBoard;
 
 public class TurkishCheckerBoard extends AbstractBoard{
 
@@ -10,7 +11,7 @@ public class TurkishCheckerBoard extends AbstractBoard{
 	}
 	
 	private void init() {
-		boardMatrix = new int[][]
+		/*boardMatrix = new int[][]
 				{ 
 			{1,1,1,1,1,1,1,1},
 			{1,1,1,1,1,1,1,1},
@@ -20,7 +21,9 @@ public class TurkishCheckerBoard extends AbstractBoard{
 			{1,1,1,1,1,1,1,1},
 			{1,1,1,1,1,1,1,1},
 			{1,1,1,1,1,1,1,1}
-				};
+				};*/
+		boardMatrix = new MatrixBoard(8,8,1);
+
 	}
 
 }
