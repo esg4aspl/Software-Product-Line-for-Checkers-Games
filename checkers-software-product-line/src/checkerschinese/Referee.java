@@ -112,7 +112,7 @@ public class Referee extends AbstractReferee {
 			}
 			consoleView.drawBoardView();
 
-			endOfGame = (isSatisfied(endRule, this));
+			endOfGame = (isSatisfied(new RuleEndOfGamePiecesOfPlayerOnFinishCoordinates(), this));
 			
 			view.printMessage("End Of Game? " + endOfGame);
 			if (endOfGame) break;
